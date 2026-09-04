@@ -1,0 +1,129 @@
+{
+    "document_metadata": {
+        "company_name": "AIA Insurance Lanka Limited",
+        "company_registration_no": "PQ 18 PB",
+        "product_name": "AIA Education Plan",
+        "category": "Savings / Life Insurance / Higher Education Plan",
+        "slogan": "Healthier, Longer, Better Lives",
+        "csr_initiative": "AIA promises to donate Rs. 100/- to the Sri Lanka Cancer Society for every policy sold in 2021.",
+        "issue_date": "06/22/2021",
+        "version": "V10-06/22/21"
+    },
+    "core_features_and_benefits": {
+        "primary_benefits": [
+            {
+                "title": "Education Fund Protection",
+                "description": "If the policyholder dies or becomes totally permanently disabled during the policy term, AIA continues paying premiums on their behalf to ensure the child receives the planned education fund."
+            },
+            {
+                "title": "Family Standard of Living Security",
+                "description": "Pays a lump sum to loved ones upon the death of the policyholder during the policy term."
+            },
+            {
+                "title": "Continuous Fund Growth",
+                "description": "Utilizes a unique dividend system (annually declared dividend rate or guaranteed dividend rate, whichever is higher, net of charges) with compounding effects."
+            },
+            {
+                "title": "Customizable Life Cover",
+                "description": "Life cover can be customized depending on individual need."
+            },
+            {
+                "title": "Loyalty Reward",
+                "description": "Entitles the policyholder to a reward of up to 400% of the Annual Basic Premium on the 10th Policy Anniversary, provided all premiums were paid within 180 days from each due date."
+            }
+        ],
+        "in_built_benefits": {
+            "amount_payable_on_death": "Basic Sum Assured + Additional Life Benefit",
+            "premium_protection_benefit": "Payment of premiums will be waived in the event of Death or Total Permanent Disability while the policy continues to provide benefits throughout the term."
+        }
+    },
+    "product_eligibility": {
+        "entry_age_years": "19-61 (Next Birthday)",
+        "maximum_maturity_age_years": 75,
+        "policy_term_years": "10-56",
+        "minimum_life_cover_lkr": 300000
+    },
+    "financial_illustration": {
+        "example_parameters": {
+            "entry_age": 30,
+            "annual_basic_premium_lkr": 50000,
+            "life_cover_multiple": "16 times Annual Basic Premium",
+            "policy_term_years": 15,
+            "annual_total_premium_lkr": 56509,
+            "includes_rider_premiums": [
+                "Additional Life Benefit",
+                "Premium Protection Benefit"
+            ]
+        },
+        "projected_maturity_benefits_lkr": {
+            "4_percent_pa": 1074238,
+            "8_percent_pa": 1433563,
+            "10_percent_pa": 1661609
+        },
+        "in_built_cover_amounts_lkr": {
+            "amount_payable_on_death": 800000,
+            "premium_protection_benefit": "Waived on Death or Total Permanent Disability"
+        }
+    },
+    "charges_and_fees": {
+        "allocation_charge": {
+            "basic_premium": {
+                "1st_policy_year": "80%",
+                "2nd_policy_year": "45%",
+                "3rd_policy_year_onwards": "0%"
+            },
+            "top_up_premium": "4% on each Top Up Premium"
+        },
+        "surrender_penalty": {
+            "1st_policy_year": "100%",
+            "2nd_policy_year": "100%",
+            "3rd_policy_year": "75%",
+            "4th_policy_year_onwards": "75% to 0% (Reducing over the policy term)"
+        },
+        "administration_charge": "LKR 262.35 for 2017 increasing by 15% per annum on 1st January each year.",
+        "fund_management_charge": "0.75% per annum of the balance of the Investment Account.",
+        "mortality_charge": "Based on Basic Sum Assured and Company's cost of cover charge rates.",
+        "modal_charge": "4% for monthly premium mode (Applicable to basic premium only)."
+    },
+    "policyholder_commitments_and_discontinuance": {
+        "grace_period_days": 30,
+        "lapse_policy_first_3_years": "If premiums are not paid within 30 days grace period during the first 3 policy years, the policy will lapse without benefit. Reinstatement option available.",
+        "continuation_after_3_years": "If premiums are defaulted after 3 or more years of payment, administration, fund management, mortality charges, and rider premiums will continue to be deducted from the Investment Account to maintain uninterrupted cover as long as balance is sufficient.",
+        "termination_condition": "Policy will immediately terminate if charges and premiums cannot be debited due to insufficient Investment Account balance.",
+        "cashing_in_surrender": "Permitted only upon completing the first 3 policy years, subject to Surrender Penalty and policy termination."
+    },
+    "optional_additional_benefits_riders": [
+        {
+            "name": "Accident Benefit",
+            "description": "Provides additional life cover in the event of accidental death and financial assistance in the event of Permanent Disability due to an accident."
+        },
+        {
+            "name": "Hospitalization Benefit",
+            "description": "Provides daily cash payment up to LKR 10,000 per day from the 1st day onwards if hospitalised for over 3 days. Doubled in ICU. Extendable to spouse and children."
+        },
+        {
+            "name": "Hospital Expense Cover",
+            "description": "Reimburses medical expenditure in Sri Lanka for policyholder and family (not covered by Premium Protection Benefit)."
+        },
+        {
+            "name": "Adult Surgery Benefit",
+            "description": "Financial support for policyholder and spouse for 250 listed surgeries in Sri Lanka, India, or Singapore."
+        },
+        {
+            "name": "Critical Illness Cover",
+            "description": "Financial assistance for policyholder and spouse for 22 listed critical illnesses up to LKR 3 million."
+        },
+        {
+            "name": "Income Protection Benefit",
+            "description": "Monthly income to dependents for maximum 10 years upon death or Total Permanent Disability."
+        },
+        {
+            "name": "Spouse Life Cover",
+            "description": "Provides life cover for spouse on the policy."
+        },
+        {
+            "name": "Child Healthcare Benefit",
+            "description": "Financial support for 250 listed surgeries (Sri Lanka, India, Singapore), hospitalisation cash, and parent stay-over allowance for children under 12."
+        }
+    ]
+}
