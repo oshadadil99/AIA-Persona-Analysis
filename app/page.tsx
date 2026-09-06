@@ -15,12 +15,20 @@ export default function Home() {
         report generation come next.
       </p>
 
-      <Link
-        href="/intake"
-        className="inline-block w-fit rounded-md bg-neutral-900 px-4 py-2 text-sm font-medium text-white dark:bg-white dark:text-neutral-900"
-      >
-        New customer intake →
-      </Link>
+      <div className="flex gap-3">
+        <Link
+          href="/intake"
+          className="inline-block w-fit rounded-md bg-neutral-900 px-4 py-2 text-sm font-medium text-white dark:bg-white dark:text-neutral-900"
+        >
+          New customer intake →
+        </Link>
+        <Link
+          href="/child-report"
+          className="inline-block w-fit rounded-md border border-neutral-300 px-4 py-2 text-sm font-medium dark:border-neutral-700"
+        >
+          Child future outlook report →
+        </Link>
+      </div>
 
       <ul className="space-y-2 text-sm text-neutral-600 dark:text-neutral-400">
         <li>Next.js App Router + TypeScript + Tailwind + Supabase</li>

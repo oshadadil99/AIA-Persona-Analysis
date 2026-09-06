@@ -1,29 +1,15 @@
 import type { StructuredProfile, RiskAssessment, FundingGapAssumptions, FundingGapProjection } from "./types";
+import { COST_ASSUMPTIONS, futureValueOfCostToday, futureValueOfAnnualContribution } from "./assumptions";
 
-// PLACEHOLDER ASSUMPTIONS — rough public estimates as of Sep 2026, not
-// verified against current AIA/market data. Override these as soon as real
-// figures are available; every output carries them explicitly so nothing
-// downstream (including the LLM explanation step) can present them as fact.
-export const FUNDING_GAP_ASSUMPTIONS: FundingGapAssumptions = {
-  educationCostInflationPercent: 8,
-  localDegreeCostTodayLkr: 2_500_000,
-  overseasDegreeCostTodayLkr: 35_000_000,
-  savingsGrowthScenariosPercent: [4, 8, 10], // mirrors the plan's own sample illustration scenarios
-  disclaimer:
-    "These education cost and inflation figures are rough placeholder assumptions, not verified " +
-    "market data or AIA-guaranteed figures. They must be confirmed before this appears in any " +
-    "customer-facing report.",
+const FUNDING_GAP_ASSUMPTIONS: FundingGapAssumptions = {
+  educationCostInflationPercent: COST_ASSUMPTIONS.generalCostInflationPercent,
+  localDegreeCostTodayLkr: COST_ASSUMPTIONS.localDegreeCostTodayLkr,
+  overseasDegreeCostTodayLkr: COST_ASSUMPTIONS.overseasDegreeCostTodayLkr,
+  savingsGrowthScenariosPercent: COST_ASSUMPTIONS.savingsGrowthScenariosPercent,
+  disclaimer: COST_ASSUMPTIONS.disclaimer,
 };
 
-function futureValueOfCostToday(costToday: number, inflationPercent: number, years: number): number {
-  return costToday * Math.pow(1 + inflationPercent / 100, years);
-}
-
-function futureValueOfAnnualSavings(annualContribution: number, growthPercent: number, years: number): number {
-  const r = growthPercent / 100;
-  if (r === 0) return annualContribution * years;
-  return annualContribution * ((Math.pow(1 + r, years) - 1) / r);
-}
+export { FUNDING_GAP_ASSUMPTIONS };
 
 // Step 2 of the pipeline (Section 3): funding-gap projection. Pure function,
 // no LLM — the numbers here are arithmetic on stated assumptions, never
@@ -69,7 +55,7 @@ export function assessFundingGap(profile: StructuredProfile): RiskAssessment {
 
     for (const growthPercent of FUNDING_GAP_ASSUMPTIONS.savingsGrowthScenariosPercent) {
       const key = `${growthPercent}%`;
-      const savings = futureValueOfAnnualSavings(annualContribution, growthPercent, years);
+      const savings = futureValueOfAnnualContribution(annualContribution, growthPercent, years);
       projectedSavingsByGrowthRateLkr[key] = Math.round(savings);
       fundingGapByGrowthRateLkr[key] = Math.round(projectedCostAtTargetLkr - savings);
     }
