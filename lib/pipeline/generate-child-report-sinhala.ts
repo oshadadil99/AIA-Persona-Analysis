@@ -21,8 +21,8 @@ STRICT RULES:
 - Every monetary figure you mention must come directly from the facts below.
 - Clearly state that education/health cost figures are assumptions, not guaranteed facts.
 - If the A/Level section applies, show the full breakdown for EACH cost category (tuition, learning materials,
-  transport, exam fee) as a clear calculation, then a combined total — not just final numbers. The goal is for
-  the parent to see exactly how each number is built and take it seriously, not to alarm them.
+  transport) as a clear calculation, then a combined total — not just final numbers. The goal is for the
+  parent to see exactly how each number is built and take it seriously, not to alarm them.
 - Tone: constructive and informative, not fear-based.
 - End with a line stating this is a computer-generated indicative report and final figures/advice should
   be confirmed with a licensed advisor.
@@ -32,7 +32,7 @@ ${facts}
 
 Write the report now, structured with short sections. If the A/Level section applies, it must be the first
 substantive section, right after a brief intro line: (1) උසස් පෙළ (A/Level) කාලය තුළ වියදම් — covering tuition,
-learning materials & stationery, transport, and exam fee as separate line items, then a combined total,
+learning materials & stationery, and transport as separate line items, then a combined total,
 (2) දරුවාගේ අනාගත අධ්‍යාපන අවශ්‍යතාව, (3) මූල්‍යමය අභියෝගය, (4) සෞඛ්‍ය අවදානම (if applicable), (5) ක්‍රීඩා සම්බන්ධ
 වියදම් (if applicable), (6) නිගමනය. If A/Level costs do not apply, skip that section and start from (2).`;
 
@@ -98,13 +98,7 @@ function buildFactsBlock(profile: ChildProfileInput, projection: ChildFutureProj
     );
 
     lines.push(
-      `4. Official exam registration fee — LKR ${projection.alExamFee.schoolCandidateLkr.toLocaleString()} if registered ` +
-        `through school, LKR ${projection.alExamFee.privateCandidateLkrMin.toLocaleString()}-${projection.alExamFee.privateCandidateLkrMax.toLocaleString()} ` +
-        `if a private candidate. Negligible amount, not inflation-adjusted.`,
-    );
-
-    lines.push(
-      `Combined A/Level period total (tuition + materials + transport + exam fee) — Total today: ` +
+      `Combined A/Level period total (tuition + materials + transport) — Total today: ` +
         `LKR ${projection.alCombinedTotal.totalCostTodayLkrMin.toLocaleString()}-${projection.alCombinedTotal.totalCostTodayLkrMax.toLocaleString()}; ` +
         `Inflation-adjusted projected total when this child reaches A/Level age: ` +
         `LKR ${projection.alCombinedTotal.projectedCostLkrMin.toLocaleString()}-${projection.alCombinedTotal.projectedCostLkrMax.toLocaleString()}`,

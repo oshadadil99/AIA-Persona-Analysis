@@ -58,14 +58,6 @@ export const A_LEVEL_TRANSPORT_ASSUMPTIONS = {
   source: "Operator-provided estimate, confirmed 2026-09-07.",
 };
 
-export const A_LEVEL_EXAM_FEE_ASSUMPTIONS = {
-  // Official exam registration fee — negligible vs. other costs, not inflated.
-  schoolCandidateLkr: 0,
-  privateCandidateLkrMin: 250,
-  privateCandidateLkrMax: 400,
-  source: "Operator-provided estimate, confirmed 2026-09-07.",
-};
-
 export function futureValueOfCostToday(costToday: number, inflationPercent: number, years: number): number {
   return costToday * Math.pow(1 + inflationPercent / 100, years);
 }

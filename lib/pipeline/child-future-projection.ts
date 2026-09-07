@@ -6,7 +6,6 @@ import {
   A_LEVEL_PERIOD_YEARS,
   A_LEVEL_MATERIALS_ASSUMPTIONS,
   A_LEVEL_TRANSPORT_ASSUMPTIONS,
-  A_LEVEL_EXAM_FEE_ASSUMPTIONS,
   futureValueOfCostToday,
   requiredAnnualContribution,
   totalOfGrowingAnnualCost,
@@ -51,12 +50,6 @@ export interface ChildFutureProjection {
   };
   alMaterials: LumpSumProjection & { annualCostLkrMin: number; annualCostLkrMax: number };
   alTransport: LumpSumProjection & { annualCostLkrMin: number; annualCostLkrMax: number };
-  alExamFee: {
-    applicable: boolean;
-    schoolCandidateLkr: number;
-    privateCandidateLkrMin: number;
-    privateCandidateLkrMax: number;
-  };
   alCombinedTotal: LumpSumProjection;
 }
 
@@ -182,21 +175,11 @@ export function projectChildFuture(profile: ChildProfileInput): ChildFutureProje
     inflation,
   );
 
-  const alExamFee = {
-    applicable: alApplicable,
-    schoolCandidateLkr: A_LEVEL_EXAM_FEE_ASSUMPTIONS.schoolCandidateLkr,
-    privateCandidateLkrMin: A_LEVEL_EXAM_FEE_ASSUMPTIONS.privateCandidateLkrMin,
-    privateCandidateLkrMax: A_LEVEL_EXAM_FEE_ASSUMPTIONS.privateCandidateLkrMax,
-  };
-
-  // Combined total: tuition + materials + transport + exam fee. Min uses the
-  // school-candidate (free) exam fee, max uses the private-candidate fee.
+  // Combined total: tuition + materials + transport.
   const combinedTodayMin =
-    alTuition.totalCostTodayLkrMin + alMaterials.totalCostTodayLkrMin + alTransport.totalCostTodayLkrMin +
-    A_LEVEL_EXAM_FEE_ASSUMPTIONS.schoolCandidateLkr;
+    alTuition.totalCostTodayLkrMin + alMaterials.totalCostTodayLkrMin + alTransport.totalCostTodayLkrMin;
   const combinedTodayMax =
-    alTuition.totalCostTodayLkrMax + alMaterials.totalCostTodayLkrMax + alTransport.totalCostTodayLkrMax +
-    A_LEVEL_EXAM_FEE_ASSUMPTIONS.privateCandidateLkrMax;
+    alTuition.totalCostTodayLkrMax + alMaterials.totalCostTodayLkrMax + alTransport.totalCostTodayLkrMax;
 
   const alCombinedTotal: LumpSumProjection = {
     applicable: alApplicable,
@@ -220,7 +203,6 @@ export function projectChildFuture(profile: ChildProfileInput): ChildFutureProje
     alTuition,
     alMaterials,
     alTransport,
-    alExamFee,
     alCombinedTotal,
   };
 }
