@@ -59,4 +59,8 @@ for (const { label, input } of samples) {
   console.log("healthRisk:", p.healthRisk);
   console.log("sports:", p.sports);
   console.log("alTuition:", p.alTuition);
+  console.log("alMaterials:", p.alMaterials);
+  console.log("alTransport:", p.alTransport);
+  console.log("alExamFee:", p.alExamFee);
+  console.log("alCombinedTotal:", p.alCombinedTotal);
 }

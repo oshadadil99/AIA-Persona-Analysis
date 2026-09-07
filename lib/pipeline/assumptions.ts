@@ -40,6 +40,32 @@ export const A_LEVEL_TUITION_ASSUMPTIONS = {
   source: "Operator-provided estimate, confirmed 2026-09-06 — not a public-data placeholder.",
 };
 
+// A/Level period is ~2.5 years — shared across all A/Level cost categories
+// below so materials/transport/exam-fee line up with the tuition duration.
+export const A_LEVEL_PERIOD_YEARS = A_LEVEL_TUITION_ASSUMPTIONS.durationMonths / 12;
+
+export const A_LEVEL_MATERIALS_ASSUMPTIONS = {
+  // Books, past papers, model papers, lab workbooks, scientific calculators.
+  annualCostLkrMin: 15_000,
+  annualCostLkrMax: 35_000,
+  source: "Operator-provided estimate, confirmed 2026-09-07.",
+};
+
+export const A_LEVEL_TRANSPORT_ASSUMPTIONS = {
+  // Daily commute to school and tuition (bus/train/three-wheeler).
+  annualCostLkrMin: 30_000,
+  annualCostLkrMax: 75_000,
+  source: "Operator-provided estimate, confirmed 2026-09-07.",
+};
+
+export const A_LEVEL_EXAM_FEE_ASSUMPTIONS = {
+  // Official exam registration fee — negligible vs. other costs, not inflated.
+  schoolCandidateLkr: 0,
+  privateCandidateLkrMin: 250,
+  privateCandidateLkrMax: 400,
+  source: "Operator-provided estimate, confirmed 2026-09-07.",
+};
+
 export function futureValueOfCostToday(costToday: number, inflationPercent: number, years: number): number {
   return costToday * Math.pow(1 + inflationPercent / 100, years);
 }
