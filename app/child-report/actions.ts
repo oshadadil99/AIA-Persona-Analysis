@@ -44,6 +44,7 @@ export async function submitChildProfileAndGenerateReport(
       household_monthly_income_lkr: input.householdMonthlyIncomeLkr,
       critical_illnesses: input.criticalIllnesses,
       higher_education_plan: input.higherEducationPlan,
+      local_private_degree_field: input.localPrivateDegreeField,
       sports_plan_description: input.sportsPlanDescription,
       sports_monthly_cost_lkr: input.sportsMonthlyCostLkr,
       notes: input.notes,

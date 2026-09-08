@@ -6,9 +6,11 @@ import {
   SRI_LANKA_PROVINCES,
   CRITICAL_ILLNESS_FLAGS,
   HIGHER_EDUCATION_PLANS,
+  LOCAL_PRIVATE_DEGREE_FIELDS,
   type Province,
   type CriticalIllnessFlag,
   type HigherEducationPlan,
+  type LocalPrivateDegreeField,
   type ChildProfileInput,
 } from "@/types/child-profile";
 
@@ -19,6 +21,7 @@ const emptyForm: ChildProfileInput = {
   householdMonthlyIncomeLkr: 0,
   criticalIllnesses: [],
   higherEducationPlan: "undecided",
+  localPrivateDegreeField: null,
   sportsPlanDescription: "",
   sportsMonthlyCostLkr: null,
   notes: "",
@@ -123,7 +126,12 @@ export default function ChildReportPage() {
           <select
             value={form.higherEducationPlan}
             onChange={(e) =>
-              setForm((f) => ({ ...f, higherEducationPlan: e.target.value as HigherEducationPlan }))
+              setForm((f) => ({
+                ...f,
+                higherEducationPlan: e.target.value as HigherEducationPlan,
+                localPrivateDegreeField:
+                  e.target.value === "local_private_degree" ? f.localPrivateDegreeField : null,
+              }))
             }
             className="input"
           >
@@ -134,6 +142,31 @@ export default function ChildReportPage() {
             ))}
           </select>
         </Field>
+
+        {form.higherEducationPlan === "local_private_degree" && (
+          <Field label="Field of study" required>
+            <select
+              required
+              value={form.localPrivateDegreeField ?? ""}
+              onChange={(e) =>
+                setForm((f) => ({
+                  ...f,
+                  localPrivateDegreeField: (e.target.value || null) as LocalPrivateDegreeField | null,
+                }))
+              }
+              className="input"
+            >
+              <option value="" disabled>
+                Select a field...
+              </option>
+              {LOCAL_PRIVATE_DEGREE_FIELDS.map(({ value, label }) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </Field>
+        )}
 
         <Field label="Critical illnesses / health flags (child)">
           <div className="flex flex-wrap gap-3">

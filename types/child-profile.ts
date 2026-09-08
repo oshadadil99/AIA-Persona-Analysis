@@ -47,6 +47,30 @@ export const HIGHER_EDUCATION_PLANS: { value: HigherEducationPlan; label: string
   { value: "undecided", label: "Undecided" },
 ];
 
+// Only relevant when higherEducationPlan === "local_private_degree" — price
+// varies a lot by field, so this drives which cost range gets used.
+export type LocalPrivateDegreeField =
+  | "business_management"
+  | "humanities_social_healthcare"
+  | "computing_it"
+  | "engineering_built_environment";
+
+export const LOCAL_PRIVATE_DEGREE_FIELDS: { value: LocalPrivateDegreeField; label: string }[] = [
+  { value: "business_management", label: "Business & Management (BBA, Marketing, HR, Finance)" },
+  {
+    value: "humanities_social_healthcare",
+    label: "Humanities, Social Sciences & Healthcare (Psychology, Biotech, Nursing, BEd)",
+  },
+  {
+    value: "computing_it",
+    label: "Computing & IT (Software Engineering, CS, Cyber Security, Data Science)",
+  },
+  {
+    value: "engineering_built_environment",
+    label: "Engineering & Built Environment (Civil, Mechanical, Architecture, Quantity Surveying)",
+  },
+];
+
 // Sri Lanka's typical age for entering higher education (post-A/Level).
 export const TYPICAL_HIGHER_EDUCATION_AGE = 19;
 
@@ -57,6 +81,7 @@ export interface ChildProfileInput {
   householdMonthlyIncomeLkr: number;
   criticalIllnesses: CriticalIllnessFlag[];
   higherEducationPlan: HigherEducationPlan;
+  localPrivateDegreeField: LocalPrivateDegreeField | null;
   sportsPlanDescription: string | null;
   sportsMonthlyCostLkr: number | null;
   notes: string | null;

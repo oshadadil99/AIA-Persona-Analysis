@@ -51,12 +51,141 @@ export const A_LEVEL_MATERIALS_ASSUMPTIONS = {
   source: "Operator-provided estimate, confirmed 2026-09-07.",
 };
 
-export const A_LEVEL_TRANSPORT_ASSUMPTIONS = {
-  // Daily commute to school and tuition (bus/train/three-wheeler).
-  annualCostLkrMin: 30_000,
-  annualCostLkrMax: 75_000,
-  source: "Operator-provided estimate, confirmed 2026-09-07.",
+// Operator-provided local private university cost ranges by field of study,
+// confirmed 2026-09-08. These are estimates, not fixed prices — actual fees
+// vary by specific institution and can change year to year.
+export const LOCAL_PRIVATE_DEGREE_COSTS_BY_FIELD: Record<
+  import("@/types/child-profile").LocalPrivateDegreeField,
+  {
+    label: string;
+    perSemesterLkrMin: number;
+    perSemesterLkrMax: number;
+    totalDegreeLkrMin: number;
+    totalDegreeLkrMax: number;
+    durationYearsMin: number;
+    durationYearsMax: number;
+  }
+> = {
+  business_management: {
+    label: "Business & Management (BBA, Marketing, HR, Finance)",
+    perSemesterLkrMin: 220_000,
+    perSemesterLkrMax: 340_000,
+    totalDegreeLkrMin: 1_800_000,
+    totalDegreeLkrMax: 2_720_000,
+    durationYearsMin: 3,
+    durationYearsMax: 4,
+  },
+  humanities_social_healthcare: {
+    label: "Humanities, Social Sciences & Healthcare (Psychology, Biotech, Nursing, BEd)",
+    perSemesterLkrMin: 200_000,
+    perSemesterLkrMax: 390_000,
+    totalDegreeLkrMin: 1_600_000,
+    totalDegreeLkrMax: 3_120_000,
+    durationYearsMin: 3,
+    durationYearsMax: 4,
+  },
+  computing_it: {
+    label: "Computing & IT (Software Engineering, CS, Cyber Security, Data Science)",
+    perSemesterLkrMin: 320_000,
+    perSemesterLkrMax: 400_000,
+    totalDegreeLkrMin: 2_400_000,
+    totalDegreeLkrMax: 3_200_000,
+    durationYearsMin: 4,
+    durationYearsMax: 4,
+  },
+  engineering_built_environment: {
+    label: "Engineering & Built Environment (Civil, Mechanical, Architecture, Quantity Surveying)",
+    perSemesterLkrMin: 340_000,
+    perSemesterLkrMax: 430_000,
+    totalDegreeLkrMin: 2_580_000,
+    totalDegreeLkrMax: 3_440_000,
+    durationYearsMin: 3,
+    durationYearsMax: 4,
+  },
 };
+export const LOCAL_PRIVATE_DEGREE_COST_SOURCE =
+  "Operator-provided estimate, confirmed 2026-09-08 — actual fees vary by institution, not fixed prices.";
+
+// Monthly living-expense categories for a LOCAL PRIVATE UNIVERSITY student —
+// ONLY these three categories, per operator instruction. No transport or
+// mobile/internet line items. Accommodation and Food & Meals are each a
+// single combined range (not broken into shared/single room or
+// self-catering/eating-out sub-options) — confirmed 2026-09-08.
+export const LOCAL_PRIVATE_LIVING_EXPENSE_CATEGORIES = {
+  accommodationLkrMin: 10_000,
+  accommodationLkrMax: 35_000,
+  foodLkrMin: 15_000,
+  foodLkrMax: 40_000,
+  miscLkrMin: 5_000,
+  miscLkrMax: 12_000,
+};
+
+// Pre-bundled realistic monthly budget tiers (not a naive sum of category
+// maxes, which would overstate cost — a student picks a consistent lifestyle,
+// not the most expensive option in every category at once).
+export const LOCAL_PRIVATE_LIVING_BUDGET_TIERS = {
+  saverLkrMin: 35_000,
+  saverLkrMax: 45_000,
+  saverDescription:
+    "Shared hostel room close to campus, eating mostly canteen or home-cooked food, relying on public buses.",
+  moderateLkrMin: 50_000,
+  moderateLkrMax: 65_000,
+  moderateDescription: "Single boarding room, mix of canteen and eating out, occasional PickMe/Uber rides.",
+};
+
+export const LOCAL_PRIVATE_LIVING_COST_SOURCE =
+  "Operator-provided estimate, confirmed 2026-09-08 — for local private university students specifically, not fixed prices.";
+
+// Sri Lankan government universities do not charge tuition fees.
+export const GOVERNMENT_UNIVERSITY_TUITION_LKR = 0;
+export const GOVERNMENT_UNIVERSITY_TUITION_SOURCE =
+  "Government (state) universities in Sri Lanka do not charge tuition fees — free education.";
+
+// General Sri Lankan undergraduate degree duration — not government-specific
+// data from the operator, reused as a reasonable default (same as the local
+// private degree fallback) since no government-specific duration was given.
+export const GOVERNMENT_DEGREE_DURATION_YEARS_MIN = 3;
+export const GOVERNMENT_DEGREE_DURATION_YEARS_MAX = 4;
+
+// Living-cost scenarios for a LOCAL GOVERNMENT UNIVERSITY undergraduate,
+// confirmed 2026-09-08. Two distinct scenarios depending on circumstances
+// outside full control (hostel allocation is competitive; Mahapola
+// eligibility is means-tested) — shown separately, never merged into one.
+export const GOVERNMENT_UNIVERSITY_LIVING_SCENARIOS = {
+  hostelWithMahapola: {
+    label: "University-subsidized hostel + Mahapola scholarship",
+    accommodationLkrMin: 0,
+    accommodationLkrMax: 0,
+    accommodationNote: "University-subsidized hostel — free.",
+    foodLkrMin: 9_000,
+    foodLkrMax: 16_000,
+    transportLkrMin: 1_500,
+    transportLkrMax: 4_000,
+    miscLkrMin: 2_500,
+    miscLkrMax: 5_000,
+    averageGrossMonthlyLkr: 20_000,
+    mahapolaMonthlyLkr: 10_000,
+    mahapolaMonthsPerYear: 10,
+  },
+  privateBoardingNoMahapola: {
+    label: "Private boarding (hostel unavailable, not Mahapola-eligible)",
+    accommodationLkrMin: 6_000,
+    accommodationLkrMax: 12_000,
+    accommodationNote: "Shared room in a private boarding house near campus.",
+    foodLkrMin: 9_000,
+    foodLkrMax: 16_000,
+    transportLkrMin: 1_500,
+    transportLkrMax: 4_000,
+    miscLkrMin: 2_500,
+    miscLkrMax: 5_000,
+    averageGrossMonthlyLkr: 35_000,
+    mahapolaMonthlyLkr: null,
+    mahapolaMonthsPerYear: null,
+  },
+};
+
+export const GOVERNMENT_UNIVERSITY_LIVING_SOURCE =
+  "Operator-provided estimate, confirmed 2026-09-08 — for local government university undergraduates specifically, not fixed prices.";
 
 export function futureValueOfCostToday(costToday: number, inflationPercent: number, years: number): number {
   return costToday * Math.pow(1 + inflationPercent / 100, years);
