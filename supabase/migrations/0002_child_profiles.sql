@@ -1,6 +1,6 @@
 -- Run this in the Supabase SQL Editor (Project > SQL Editor > New query).
 -- Separate flow from customer_profiles: this one is child-centric and
--- drives the "future outlook" Sinhala report, independent of AIA plan
+-- drives the "future outlook" Sinhala report, independent of insurance plan
 -- eligibility matching.
 
 create table if not exists child_profiles (

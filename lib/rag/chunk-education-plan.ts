@@ -10,7 +10,7 @@ export interface PlanChunk {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function chunkEducationPlan(plan: any): PlanChunk[] {
-  const name = plan.document_metadata?.product_name ?? "AIA Education Plan";
+  const name = plan.document_metadata?.product_name ?? "Education Plan";
   const chunks: PlanChunk[] = [];
 
   const primaryBenefits = plan.core_features_and_benefits?.primary_benefits ?? [];

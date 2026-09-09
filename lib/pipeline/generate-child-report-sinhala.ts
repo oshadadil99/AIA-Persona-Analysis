@@ -12,52 +12,42 @@ export async function generateChildReportSinhala(
 ): Promise<string> {
   const facts = buildFactsBlock(profile, projection);
 
-  const prompt = `You are writing a plain-language financial planning report in SINHALA for a Sri Lankan
-parent/guardian, based ONLY on the facts and numbers given below. This is an indicative, computer-generated
-outlook — not a guarantee and not final insurance advice.
+  const prompt = `You are writing a SHORT, warm narrative introduction and conclusion in SINHALA for a Sri
+Lankan parent/guardian's financial planning report. This is an indicative, computer-generated outlook — not
+a guarantee and not final insurance advice.
+
+IMPORTANT CONTEXT: The detailed pricing breakdown (every cost category, every table, every growth-rate
+scenario, the grand total) is ALREADY shown to the reader as proper tables directly above this text — built
+from the exact same numbers you're given below. Your job is NOT to repeat that breakdown in prose. Your job
+is to write the human, explanatory framing around it: what this all means for the family, in plain warm
+language, without turning into a second copy of the tables.
 
 STRICT RULES:
-- Write the entire report in Sinhala (Sinhala script), not English or Singlish.
-- Do NOT invent, estimate, or adjust any number. Use only the exact figures given below.
-- Do NOT perform arithmetic yourself — including adding multiple section totals together into a grand total.
-  If a combined/grand total is needed, use the pre-computed "Grand total" figure given in the facts below,
-  never compute your own sum even if the addition seems simple.
-- Every monetary figure you mention must come directly from the facts below.
-- Clearly state that education/health cost figures are assumptions, not guaranteed facts.
-- Only show a "breakdown then summary" structure when there is an ACTUAL multi-step calculation behind the
-  number (e.g. per-class fee x classes/month x duration = total; or a cost figure broken into required monthly
-  saving per growth-rate scenario). In those cases, show the calculation steps, then the resulting total.
-  If a fact is just a single flat figure or range with nothing to calculate (e.g. "Accommodation: LKR
-  10,000-35,000/month"), state it ONCE — do not invent a "breakdown" section and a "summary" section that
-  just repeat the same number twice. Never restate an identical figure under two different headings.
-- When multiple named items exist side by side (e.g. the Saver tier and Moderate tier), list them as they are
-  — do not collapse or merge them into a single fabricated combined range (e.g. do not turn two separate tiers
-  into one "35,000-65,000" figure that doesn't correspond to any real value in the facts).
-- Tone: Friendly, empathetic, and encouraging—written in a warm, polite Sri Lankan style (approachable, supportive, and conversational yet respectful). Avoid heavy academic or rigid corporate Sinhala. Informative and constructive, not fear-based or overwhelming.
-  End the output with a polite closing statement:
+- Write entirely in Sinhala (Sinhala script), not English or Singlish.
+- Do NOT use any markdown formatting — no asterisks (no **text**), no markdown headers (#, ##), no markdown
+  bullet lists (* or -). Plain text only, plain sentences and paragraphs.
+- If the child's name is given, use it by name instead of generic "දරුවා"/"ඔබේ දරුවා" wherever natural. If the
+  customer/parent's name is given, address them by name where natural (opening/closing). If a name is not
+  given, use the generic Sinhala address — never invent a name.
+- Do NOT invent, estimate, or restate detailed cost figures — the tables already show every number precisely.
+  You MAY mention the single headline "Grand total" range once, in prose, since that's the one figure worth
+  reinforcing in words — but do not walk through each cost category's numbers one by one.
+- Do NOT perform any arithmetic yourself.
+- Clearly state, once, that these cost/inflation figures are assumptions, not guaranteed facts.
+- Tone: friendly, empathetic, encouraging — warm, polite Sri Lankan style, conversational yet respectful.
+  Constructive and informative, not fear-based or overwhelming.
+- End with this exact closing statement:
   "මෙය පරිගණකයක් මගින් සකස් කරන ලද දළ වාර්තාවක් (computer-generated indicative report) වන අතර, අවසාන සංඛ්‍යාලේඛන සහ මූල්‍ය උපදෙස් සඳහා බලපත්‍රලාභී මූල්‍ය උපදේශකයෙකු හමු වී තහවුරු කරගන්න."
 
-FACTS:
+FACTS (for context only — do not restate these as a list; the reader already sees them in the tables above):
 ${facts}
 
-Write the report now, structured with short sections. If the A/Level section applies, it must be the first
-substantive section, right after a brief intro line: (1) උසස් පෙළ (A/Level) කාලය තුළ වියදම් — covering tuition
-and learning materials & stationery as separate line items, then a combined total,
-(2) දරුවාගේ අනාගත අධ්‍යාපන අවශ්‍යතාව, (3) විශ්ව විද්‍යාල කාලය තුළ ජීවන වියදම් —
-  if the plan is a LOCAL PRIVATE degree: covering ONLY accommodation, food & meals, and miscellaneous/personal
-  expenses as separate line items (no transport, no mobile/internet — do not add categories beyond these
-  three; state each figure once, no breakdown/summary duplication since these are flat figures with nothing to
-  calculate), then list the Saver and Moderate budget tiers as the two separate named options they are (do not
-  merge them into one range);
-  if the plan is a LOCAL GOVERNMENT university degree: present BOTH scenarios separately (hostel+Mahapola, and
-  private boarding without Mahapola) — for each, list accommodation/food/transport/personal-care as flat
-  figures (state once, no duplication), then for the Mahapola scenario show the real calculation of the
-  effective monthly average accounting for the 10-of-12-months payment (breakdown then summary), then each
-  scenario's total cost for the whole degree today and inflation-adjusted;
-(4) මූල්‍යමය අභියෝගය — this section must present the pre-computed
-"Grand total" fact (A/Level + degree + living cost components, then the grand total) rather than adding any
-numbers together itself, (5) සෞඛ්‍ය අවදානම (if applicable), (6) ක්‍රීඩා සම්බන්ධ වියදම් (if applicable), (7) නිගමනය.
-Skip any section whose "applicable"/condition is not met.`;
+Write a short piece (roughly 4-7 sentences total, 2-3 short paragraphs) covering: (1) a warm opening
+acknowledging the family's planning for the child's future, naming the stated higher-education plan in one
+line, (2) one sentence referencing the Grand Total range as the headline takeaway, (3) a brief, encouraging
+note about planning ahead (mention the health/sports facts only if they were flagged as applicable), (4) the
+required closing statement above. Do not add section headings or numbered sections — this is a short
+connective narrative, not a structured report.`;
 
   const result = await callGemini(prompt);
   const text = result?.candidates?.[0]?.content?.parts?.[0]?.text;
@@ -70,6 +60,10 @@ Skip any section whose "applicable"/condition is not met.`;
 function buildFactsBlock(profile: ChildProfileInput, projection: ChildFutureProjection): string {
   const lines: string[] = [];
 
+  lines.push(
+    `Customer/parent name: ${profile.customerName ?? "(not provided — use generic address, e.g. ඔබ)"}`,
+  );
+  lines.push(`Child's name: ${profile.childName ?? "(not provided — use generic reference, e.g. දරුවා)"}`);
   lines.push(`Child's current age: ${profile.childAge}`);
   lines.push(`Typical higher education entry age in Sri Lanka: 19`);
   lines.push(`Years until then: ${projection.yearsToHigherEducation}`);
@@ -168,6 +162,66 @@ function buildFactsBlock(profile: ChildProfileInput, projection: ChildFutureProj
     }
   }
 
+  if (projection.vocationalTrainingLivingExpenses.applicable) {
+    const v = projection.vocationalTrainingLivingExpenses;
+    const c = v.monthlyCategories;
+
+    lines.push(
+      `Living/recurring expenses (applicable — plan is vocational/technical training). Vocational training ` +
+        `course fee is treated as free/no separate charge. Assumed course duration: ${v.durationYears} year(s). ` +
+        `All figures below are monthly LKR ranges unless noted.`,
+    );
+
+    lines.push(`1. Food & canteen meals: ${c.foodLkrMin.toLocaleString()}-${c.foodLkrMax.toLocaleString()}/month`);
+    lines.push(
+      `2. Course materials, tools & stationery: ${c.materialsLkrMin.toLocaleString()}-${c.materialsLkrMax.toLocaleString()}/month`,
+    );
+    lines.push(
+      `3. Mobile data & internet: ${c.mobileInternetLkrMin.toLocaleString()}-${c.mobileInternetLkrMax.toLocaleString()}/month`,
+    );
+    lines.push(
+      `4. Personal care & miscellaneous: ${c.miscLkrMin.toLocaleString()}-${c.miscLkrMax.toLocaleString()}/month`,
+    );
+
+    lines.push(
+      `Average total monthly living cost (operator-given figure, not a sum of the categories above): ` +
+        `LKR ${v.averageMonthlyLkrMin.toLocaleString()}-${v.averageMonthlyLkrMax.toLocaleString()}/month. ` +
+        `This is a real calculation for the total: average monthly cost x 12 months x ${v.durationYears} year(s) ` +
+        `= Total cost today: LKR ${v.totalCostTodayLkrMin.toLocaleString()}-${v.totalCostTodayLkrMax.toLocaleString()}; ` +
+        `Inflation-adjusted projected total when this child starts training: ` +
+        `LKR ${v.projectedTotalCostLkrMin.toLocaleString()}-${v.projectedTotalCostLkrMax.toLocaleString()}`,
+    );
+  }
+
+  if (projection.overseasDegreeCostBreakdown.applicable) {
+    const o = projection.overseasDegreeCostBreakdown;
+
+    lines.push(
+      `Overseas degree total ${o.durationYears}-year cost breakdown (applicable — plan is an overseas degree). ` +
+        `These 5 categories sum exactly to the grand total below (a real, verified calculation, not rounded ` +
+        `tiers). All figures are LKR ranges converted from EUR.`,
+    );
+
+    lines.push(`1. Tuition fees: LKR ${o.tuitionLkrMin.toLocaleString()}-${o.tuitionLkrMax.toLocaleString()}`);
+    lines.push(
+      `2. Accommodation (dorms/shared apartments): LKR ${o.accommodationLkrMin.toLocaleString()}-${o.accommodationLkrMax.toLocaleString()}`,
+    );
+    lines.push(`3. Food & daily groceries: LKR ${o.foodLkrMin.toLocaleString()}-${o.foodLkrMax.toLocaleString()}`);
+    lines.push(
+      `4. Mandatory health insurance: LKR ${o.healthInsuranceLkrMin.toLocaleString()}-${o.healthInsuranceLkrMax.toLocaleString()}`,
+    );
+    lines.push(
+      `5. Transport & personal communications: LKR ${o.transportCommunicationsLkrMin.toLocaleString()}-${o.transportCommunicationsLkrMax.toLocaleString()}`,
+    );
+
+    lines.push(
+      `Grand total investment (${o.durationYears} years) — sum of the 5 categories above — Total today: ` +
+        `LKR ${o.grandTotalTodayLkrMin.toLocaleString()}-${o.grandTotalTodayLkrMax.toLocaleString()}; ` +
+        `Inflation-adjusted projected total when this child starts the degree: ` +
+        `LKR ${o.projectedGrandTotalLkrMin.toLocaleString()}-${o.projectedGrandTotalLkrMax.toLocaleString()}`,
+    );
+  }
+
   if (projection.alTuition.applicable) {
     const b = projection.alTuition.breakdown;
     const years = projection.alTuition.yearsUntilStart;
@@ -213,11 +267,16 @@ function buildFactsBlock(profile: ChildProfileInput, projection: ChildFutureProj
   }
 
   const gt = projection.grandTotal;
+  const livingCostLine = projection.overseasDegreeCostBreakdown.applicable
+    ? `Living costs during degree: already included within the degree cost figure above (the overseas ` +
+      `breakdown bundles tuition, accommodation, food, insurance, and transport into one total) — do not ` +
+      `show this as a separate LKR 0 line, and do not imply there are no living costs.`
+    : `Living costs during degree: LKR ${gt.components.livingCostProjectedLkrMin.toLocaleString()}-${gt.components.livingCostProjectedLkrMax.toLocaleString()}; `;
   lines.push(
     `Grand total (PRE-COMPUTED — use this exact figure, do not add the components yourself): ` +
       `A/Level period: LKR ${gt.components.aLevelPeriodProjectedLkrMin.toLocaleString()}-${gt.components.aLevelPeriodProjectedLkrMax.toLocaleString()}; ` +
       `Degree cost: LKR ${gt.components.degreeCostProjectedLkrMin.toLocaleString()}-${gt.components.degreeCostProjectedLkrMax.toLocaleString()}; ` +
-      `Living costs during degree: LKR ${gt.components.livingCostProjectedLkrMin.toLocaleString()}-${gt.components.livingCostProjectedLkrMax.toLocaleString()}; ` +
+      `${livingCostLine}` +
       `GRAND TOTAL: LKR ${gt.projectedTotalLkrMin.toLocaleString()}-${gt.projectedTotalLkrMax.toLocaleString()}`,
   );
 

@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "AIA Advisory — Internal Tool",
+  title: "Advisory — Internal Tool",
   description: "Internal operator tool for insurance advisory recommendations",
 };
 

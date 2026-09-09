@@ -14,6 +14,14 @@ import {
   GOVERNMENT_DEGREE_DURATION_YEARS_MIN,
   GOVERNMENT_DEGREE_DURATION_YEARS_MAX,
   GOVERNMENT_UNIVERSITY_LIVING_SCENARIOS,
+  VOCATIONAL_TRAINING_TUITION_LKR,
+  VOCATIONAL_TRAINING_TUITION_SOURCE,
+  VOCATIONAL_TRAINING_DURATION_YEARS,
+  VOCATIONAL_TRAINING_LIVING_EXPENSE_CATEGORIES,
+  VOCATIONAL_TRAINING_AVERAGE_MONTHLY_LKR_MIN,
+  VOCATIONAL_TRAINING_AVERAGE_MONTHLY_LKR_MAX,
+  OVERSEAS_DEGREE_COST_BREAKDOWN,
+  OVERSEAS_DEGREE_COST_SOURCE,
   futureValueOfCostToday,
   requiredAnnualContribution,
   totalOfGrowingAnnualCost,
@@ -35,6 +43,10 @@ export interface ChildFutureProjection {
     scenario: "local_degree" | "overseas_degree";
     fieldOfStudyLabel: string | null; // set when local_degree uses field-specific data
     source: string;
+    durationYearsMin: number;
+    durationYearsMax: number;
+    perYearCostTodayLkrMin: number;
+    perYearCostTodayLkrMax: number;
     costTodayLkrMin: number;
     costTodayLkrMax: number;
     projectedCostAtAge19LkrMin: number;
@@ -115,6 +127,39 @@ export interface ChildFutureProjection {
       projectedTotalCostLkrMax: number;
     };
   };
+  // Only applicable when higherEducationPlan === "overseas_degree" —
+  // itemized breakdown behind the overseas degree cost range shown in the
+  // `education` array above.
+  overseasDegreeCostBreakdown: {
+    applicable: boolean;
+    durationYears: number;
+    tuitionLkrMin: number;
+    tuitionLkrMax: number;
+    accommodationLkrMin: number;
+    accommodationLkrMax: number;
+    foodLkrMin: number;
+    foodLkrMax: number;
+    healthInsuranceLkrMin: number;
+    healthInsuranceLkrMax: number;
+    transportCommunicationsLkrMin: number;
+    transportCommunicationsLkrMax: number;
+    grandTotalTodayLkrMin: number;
+    grandTotalTodayLkrMax: number;
+    projectedGrandTotalLkrMin: number;
+    projectedGrandTotalLkrMax: number;
+  };
+  // Only applicable when higherEducationPlan === "vocational_training".
+  vocationalTrainingLivingExpenses: {
+    applicable: boolean;
+    durationYears: number;
+    monthlyCategories: typeof VOCATIONAL_TRAINING_LIVING_EXPENSE_CATEGORIES;
+    averageMonthlyLkrMin: number;
+    averageMonthlyLkrMax: number;
+    totalCostTodayLkrMin: number;
+    totalCostTodayLkrMax: number;
+    projectedTotalCostLkrMin: number;
+    projectedTotalCostLkrMax: number;
+  };
   // Pre-computed sum of the sections above — never let the LLM add these
   // figures together itself.
   grandTotal: {
@@ -183,6 +228,8 @@ export function projectChildFuture(profile: ChildProfileInput): ChildFutureProje
     source: string;
     costTodayLkrMin: number;
     costTodayLkrMax: number;
+    durationYearsMin: number;
+    durationYearsMax: number;
   } =
     profile.higherEducationPlan === "local_government_degree"
       ? {
@@ -191,7 +238,19 @@ export function projectChildFuture(profile: ChildProfileInput): ChildFutureProje
           source: GOVERNMENT_UNIVERSITY_TUITION_SOURCE,
           costTodayLkrMin: GOVERNMENT_UNIVERSITY_TUITION_LKR,
           costTodayLkrMax: GOVERNMENT_UNIVERSITY_TUITION_LKR,
+          durationYearsMin: GOVERNMENT_DEGREE_DURATION_YEARS_MIN,
+          durationYearsMax: GOVERNMENT_DEGREE_DURATION_YEARS_MAX,
         }
+      : profile.higherEducationPlan === "vocational_training"
+        ? {
+            scenario: "local_degree",
+            fieldOfStudyLabel: null,
+            source: VOCATIONAL_TRAINING_TUITION_SOURCE,
+            costTodayLkrMin: VOCATIONAL_TRAINING_TUITION_LKR,
+            costTodayLkrMax: VOCATIONAL_TRAINING_TUITION_LKR,
+            durationYearsMin: VOCATIONAL_TRAINING_DURATION_YEARS,
+            durationYearsMax: VOCATIONAL_TRAINING_DURATION_YEARS,
+          }
       : localField
         ? {
             scenario: "local_degree",
@@ -199,6 +258,8 @@ export function projectChildFuture(profile: ChildProfileInput): ChildFutureProje
             source: LOCAL_PRIVATE_DEGREE_COST_SOURCE,
             costTodayLkrMin: localField.totalDegreeLkrMin,
             costTodayLkrMax: localField.totalDegreeLkrMax,
+            durationYearsMin: localField.durationYearsMin,
+            durationYearsMax: localField.durationYearsMax,
           }
         : {
             scenario: "local_degree",
@@ -206,6 +267,8 @@ export function projectChildFuture(profile: ChildProfileInput): ChildFutureProje
             source: COST_ASSUMPTIONS.disclaimer,
             costTodayLkrMin: COST_ASSUMPTIONS.localDegreeCostTodayLkr,
             costTodayLkrMax: COST_ASSUMPTIONS.localDegreeCostTodayLkr,
+            durationYearsMin: 3,
+            durationYearsMax: 4,
           };
 
   const scenarios: {
@@ -214,47 +277,62 @@ export function projectChildFuture(profile: ChildProfileInput): ChildFutureProje
     source: string;
     costTodayLkrMin: number;
     costTodayLkrMax: number;
+    durationYearsMin: number;
+    durationYearsMax: number;
   }[] = [
     localDegreeScenario,
     {
       scenario: "overseas_degree",
       fieldOfStudyLabel: null,
-      source: COST_ASSUMPTIONS.disclaimer,
-      costTodayLkrMin: COST_ASSUMPTIONS.overseasDegreeCostTodayLkr,
-      costTodayLkrMax: COST_ASSUMPTIONS.overseasDegreeCostTodayLkr,
+      source: OVERSEAS_DEGREE_COST_SOURCE,
+      costTodayLkrMin: OVERSEAS_DEGREE_COST_BREAKDOWN.grandTotalLkrMin,
+      costTodayLkrMax: OVERSEAS_DEGREE_COST_BREAKDOWN.grandTotalLkrMax,
+      durationYearsMin: OVERSEAS_DEGREE_COST_BREAKDOWN.durationYears,
+      durationYearsMax: OVERSEAS_DEGREE_COST_BREAKDOWN.durationYears,
     },
   ];
 
-  const education = scenarios.map(({ scenario, fieldOfStudyLabel, source, costTodayLkrMin, costTodayLkrMax }) => {
-    const projectedCostAtAge19LkrMin = Math.round(
-      futureValueOfCostToday(costTodayLkrMin, inflation, yearsToHigherEducation),
-    );
-    const projectedCostAtAge19LkrMax = Math.round(
-      futureValueOfCostToday(costTodayLkrMax, inflation, yearsToHigherEducation),
-    );
-
-    const requiredMonthlySavingByGrowthRateLkr: Record<string, number> = {};
-    for (const growthPercent of COST_ASSUMPTIONS.savingsGrowthScenariosPercent) {
-      const key = `${growthPercent}%`;
-      const annual = requiredAnnualContribution(
-        projectedCostAtAge19LkrMax,
-        growthPercent,
-        yearsToHigherEducation,
+  const education = scenarios.map(
+    ({ scenario, fieldOfStudyLabel, source, costTodayLkrMin, costTodayLkrMax, durationYearsMin, durationYearsMax }) => {
+      const projectedCostAtAge19LkrMin = Math.round(
+        futureValueOfCostToday(costTodayLkrMin, inflation, yearsToHigherEducation),
       );
-      requiredMonthlySavingByGrowthRateLkr[key] = Math.round(annual / 12);
-    }
+      const projectedCostAtAge19LkrMax = Math.round(
+        futureValueOfCostToday(costTodayLkrMax, inflation, yearsToHigherEducation),
+      );
 
-    return {
-      scenario,
-      fieldOfStudyLabel,
-      source,
-      costTodayLkrMin,
-      costTodayLkrMax,
-      projectedCostAtAge19LkrMin,
-      projectedCostAtAge19LkrMax,
-      requiredMonthlySavingByGrowthRateLkr,
-    };
-  });
+      const requiredMonthlySavingByGrowthRateLkr: Record<string, number> = {};
+      for (const growthPercent of COST_ASSUMPTIONS.savingsGrowthScenariosPercent) {
+        const key = `${growthPercent}%`;
+        const annual = requiredAnnualContribution(
+          projectedCostAtAge19LkrMax,
+          growthPercent,
+          yearsToHigherEducation,
+        );
+        requiredMonthlySavingByGrowthRateLkr[key] = Math.round(annual / 12);
+      }
+
+      // "Per year" is a simple average (total / duration) — a transparent
+      // derived figure, not a separately-sourced number.
+      const perYearCostTodayLkrMin = Math.round(costTodayLkrMin / durationYearsMax);
+      const perYearCostTodayLkrMax = Math.round(costTodayLkrMax / durationYearsMin);
+
+      return {
+        scenario,
+        fieldOfStudyLabel,
+        source,
+        durationYearsMin,
+        durationYearsMax,
+        perYearCostTodayLkrMin,
+        perYearCostTodayLkrMax,
+        costTodayLkrMin,
+        costTodayLkrMax,
+        projectedCostAtAge19LkrMin,
+        projectedCostAtAge19LkrMax,
+        requiredMonthlySavingByGrowthRateLkr,
+      };
+    },
+  );
 
   const healthFlagged = profile.criticalIllnesses.length > 0;
   const healthRisk = {
@@ -262,7 +340,7 @@ export function projectChildFuture(profile: ChildProfileInput): ChildFutureProje
     referenceAmountLkr: COST_ASSUMPTIONS.criticalIllnessCoverReferenceAmountLkr,
     note: healthFlagged
       ? `Health flags noted. As a reference point (not a recommendation of any specific cover amount), ` +
-        `AIA's own Critical Illness Cover rider covers up to LKR ${COST_ASSUMPTIONS.criticalIllnessCoverReferenceAmountLkr.toLocaleString()} ` +
+        `the policy's own Critical Illness Cover rider covers up to LKR ${COST_ASSUMPTIONS.criticalIllnessCoverReferenceAmountLkr.toLocaleString()} ` +
         `for 22 listed illnesses — a licensed advisor should confirm what cover level actually fits this child's specific condition(s).`
       : "No health flags noted.",
   };
@@ -426,6 +504,56 @@ export function projectChildFuture(profile: ChildProfileInput): ChildFutureProje
     },
   };
 
+  const overseasApplicable = profile.higherEducationPlan === "overseas_degree";
+  const overseasDegreeCostBreakdown = {
+    applicable: overseasApplicable,
+    durationYears: OVERSEAS_DEGREE_COST_BREAKDOWN.durationYears,
+    tuitionLkrMin: OVERSEAS_DEGREE_COST_BREAKDOWN.tuitionLkrMin,
+    tuitionLkrMax: OVERSEAS_DEGREE_COST_BREAKDOWN.tuitionLkrMax,
+    accommodationLkrMin: OVERSEAS_DEGREE_COST_BREAKDOWN.accommodationLkrMin,
+    accommodationLkrMax: OVERSEAS_DEGREE_COST_BREAKDOWN.accommodationLkrMax,
+    foodLkrMin: OVERSEAS_DEGREE_COST_BREAKDOWN.foodLkrMin,
+    foodLkrMax: OVERSEAS_DEGREE_COST_BREAKDOWN.foodLkrMax,
+    healthInsuranceLkrMin: OVERSEAS_DEGREE_COST_BREAKDOWN.healthInsuranceLkrMin,
+    healthInsuranceLkrMax: OVERSEAS_DEGREE_COST_BREAKDOWN.healthInsuranceLkrMax,
+    transportCommunicationsLkrMin: OVERSEAS_DEGREE_COST_BREAKDOWN.transportCommunicationsLkrMin,
+    transportCommunicationsLkrMax: OVERSEAS_DEGREE_COST_BREAKDOWN.transportCommunicationsLkrMax,
+    grandTotalTodayLkrMin: OVERSEAS_DEGREE_COST_BREAKDOWN.grandTotalLkrMin,
+    grandTotalTodayLkrMax: OVERSEAS_DEGREE_COST_BREAKDOWN.grandTotalLkrMax,
+    projectedGrandTotalLkrMin: overseasApplicable
+      ? Math.round(
+          futureValueOfCostToday(OVERSEAS_DEGREE_COST_BREAKDOWN.grandTotalLkrMin, inflation, yearsToHigherEducation),
+        )
+      : 0,
+    projectedGrandTotalLkrMax: overseasApplicable
+      ? Math.round(
+          futureValueOfCostToday(OVERSEAS_DEGREE_COST_BREAKDOWN.grandTotalLkrMax, inflation, yearsToHigherEducation),
+        )
+      : 0,
+  };
+
+  const vocationalApplicable = profile.higherEducationPlan === "vocational_training";
+  const vocationalTotalTodayLkrMin =
+    VOCATIONAL_TRAINING_AVERAGE_MONTHLY_LKR_MIN * 12 * VOCATIONAL_TRAINING_DURATION_YEARS;
+  const vocationalTotalTodayLkrMax =
+    VOCATIONAL_TRAINING_AVERAGE_MONTHLY_LKR_MAX * 12 * VOCATIONAL_TRAINING_DURATION_YEARS;
+
+  const vocationalTrainingLivingExpenses = {
+    applicable: vocationalApplicable,
+    durationYears: VOCATIONAL_TRAINING_DURATION_YEARS,
+    monthlyCategories: VOCATIONAL_TRAINING_LIVING_EXPENSE_CATEGORIES,
+    averageMonthlyLkrMin: VOCATIONAL_TRAINING_AVERAGE_MONTHLY_LKR_MIN,
+    averageMonthlyLkrMax: VOCATIONAL_TRAINING_AVERAGE_MONTHLY_LKR_MAX,
+    totalCostTodayLkrMin: vocationalTotalTodayLkrMin,
+    totalCostTodayLkrMax: vocationalTotalTodayLkrMax,
+    projectedTotalCostLkrMin: vocationalApplicable
+      ? Math.round(futureValueOfCostToday(vocationalTotalTodayLkrMin, inflation, yearsToHigherEducation))
+      : 0,
+    projectedTotalCostLkrMax: vocationalApplicable
+      ? Math.round(futureValueOfCostToday(vocationalTotalTodayLkrMax, inflation, yearsToHigherEducation))
+      : 0,
+  };
+
   // Grand total: A/Level costs + the degree cost that matches the ACTUAL
   // stated plan + living expenses (if applicable). Computed here in code, not
   // left for the LLM to add up itself — three separately-inflated figures
@@ -439,12 +567,16 @@ export function projectChildFuture(profile: ChildProfileInput): ChildFutureProje
     ? localPrivateLivingExpenses.projectedTotalLivingCostLkrMin
     : governmentUniversityLivingExpenses.applicable
       ? governmentUniversityLivingExpenses.combinedEnvelope.projectedTotalCostLkrMin
-      : 0;
+      : vocationalTrainingLivingExpenses.applicable
+        ? vocationalTrainingLivingExpenses.projectedTotalCostLkrMin
+        : 0;
   const livingCostProjectedLkrMax = localPrivateLivingExpenses.applicable
     ? localPrivateLivingExpenses.projectedTotalLivingCostLkrMax
     : governmentUniversityLivingExpenses.applicable
       ? governmentUniversityLivingExpenses.combinedEnvelope.projectedTotalCostLkrMax
-      : 0;
+      : vocationalTrainingLivingExpenses.applicable
+        ? vocationalTrainingLivingExpenses.projectedTotalCostLkrMax
+        : 0;
 
   const grandTotal = {
     components: {
@@ -473,6 +605,8 @@ export function projectChildFuture(profile: ChildProfileInput): ChildFutureProje
     alCombinedTotal,
     localPrivateLivingExpenses,
     governmentUniversityLivingExpenses,
+    overseasDegreeCostBreakdown,
+    vocationalTrainingLivingExpenses,
     grandTotal,
   };
 }

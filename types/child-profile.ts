@@ -74,7 +74,28 @@ export const LOCAL_PRIVATE_DEGREE_FIELDS: { value: LocalPrivateDegreeField; labe
 // Sri Lanka's typical age for entering higher education (post-A/Level).
 export const TYPICAL_HIGHER_EDUCATION_AGE = 19;
 
+// Parent/guardian's own health flags — distinct from the child's
+// CriticalIllnessFlag above. Carried over from the old separate /intake form.
+export type CustomerHealthFlag = "smoker" | "chronic_illness" | "family_history" | "prior_claim";
+
+export const CUSTOMER_HEALTH_FLAGS: { value: CustomerHealthFlag; label: string }[] = [
+  { value: "smoker", label: "Smoker" },
+  { value: "chronic_illness", label: "Chronic illness" },
+  { value: "family_history", label: "Family history of major illness" },
+  { value: "prior_claim", label: "Prior insurance claim" },
+];
+
 export interface ChildProfileInput {
+  // Customer / parent-guardian fields (merged in from the old /intake form).
+  customerName: string | null;
+  customerContactNumber: string | null;
+  customerAge: number | null;
+  dependentsCount: number;
+  desiredLifeCoverLkr: number | null;
+  monthlyBudgetLkr: number | null;
+  customerHealthFlags: CustomerHealthFlag[];
+
+  // Child fields.
   childName: string | null;
   childAge: number;
   province: Province;

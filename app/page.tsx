@@ -2,38 +2,50 @@ import Link from "next/link";
 
 export default function Home() {
   return (
-    <main className="mx-auto flex max-w-2xl flex-1 flex-col justify-center gap-6 p-8">
-      <div>
-        <p className="text-sm uppercase tracking-widest text-neutral-500">
+    <main className="relative flex min-h-screen flex-1 items-center justify-center overflow-hidden bg-white dark:bg-neutral-950">
+      {/* Decorative animated background */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="animate-float-slow absolute -top-32 -left-24 h-96 w-96 rounded-full bg-emerald-200/50 blur-3xl dark:bg-emerald-900/30" />
+        <div className="animate-float-slow-reverse absolute top-1/3 -right-24 h-96 w-96 rounded-full bg-teal-200/40 blur-3xl dark:bg-teal-900/20" />
+        <div className="animate-float-slow absolute bottom-0 left-1/4 h-72 w-72 rounded-full bg-emerald-100/60 blur-3xl dark:bg-emerald-950/30" />
+      </div>
+
+      <div className="relative z-10 mx-auto flex max-w-2xl flex-col gap-6 px-8 py-16 text-center">
+        <p
+          className="animate-fade-in-up text-sm font-medium tracking-widest text-emerald-600 uppercase dark:text-emerald-400"
+          style={{ animationDelay: "0ms" }}
+        >
           Internal tool — operator use only
         </p>
-        <h1 className="mt-2 text-3xl font-semibold">AI Insurance Advisory Platform</h1>
-      </div>
 
-      <p className="text-neutral-600 dark:text-neutral-400">
-        Operator profile intake is live. Rules engine, pipeline, and Sinhala
-        report generation come next.
-      </p>
-
-      <div className="flex gap-3">
-        <Link
-          href="/intake"
-          className="inline-block w-fit rounded-md bg-neutral-900 px-4 py-2 text-sm font-medium text-white dark:bg-white dark:text-neutral-900"
+        <h1
+          className="animate-fade-in-up text-4xl font-semibold tracking-tight text-neutral-900 sm:text-5xl dark:text-white"
+          style={{ animationDelay: "80ms" }}
         >
-          New customer intake →
-        </Link>
-        <Link
-          href="/child-report"
-          className="inline-block w-fit rounded-md border border-neutral-300 px-4 py-2 text-sm font-medium dark:border-neutral-700"
-        >
-          Child future outlook report →
-        </Link>
-      </div>
+          Insurance Advisory Platform
+        </h1>
 
-      <ul className="space-y-2 text-sm text-neutral-600 dark:text-neutral-400">
-        <li>Next.js App Router + TypeScript + Tailwind + Supabase</li>
-        <li>Pinecone, Inngest, Vertex AI pipeline — set up, not yet wired end-to-end</li>
-      </ul>
+        <p
+          className="animate-fade-in-up mx-auto max-w-lg text-base text-neutral-600 dark:text-neutral-400"
+          style={{ animationDelay: "160ms" }}
+        >
+          A single intake form captures the customer/policyholder profile and the child&apos;s details, then
+          generates a Sinhala-language future outlook report.
+        </p>
+
+        <div className="animate-fade-in-up mt-2 flex justify-center" style={{ animationDelay: "240ms" }}>
+          <Link
+            href="/child-report"
+            className="group inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-6 py-3 text-sm
+              font-semibold text-white shadow-lg shadow-emerald-600/20 transition
+              hover:-translate-y-0.5 hover:bg-emerald-700 hover:shadow-xl hover:shadow-emerald-600/30
+              active:translate-y-0"
+          >
+            New customer & child intake
+            <span className="transition-transform group-hover:translate-x-1">→</span>
+          </Link>
+        </div>
+      </div>
     </main>
   );
 }

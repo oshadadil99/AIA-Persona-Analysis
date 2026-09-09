@@ -8,7 +8,6 @@ import educationPlan from "@/data/education.json";
 export const COST_ASSUMPTIONS = {
   generalCostInflationPercent: 8,
   localDegreeCostTodayLkr: 2_500_000,
-  overseasDegreeCostTodayLkr: 35_000_000,
   savingsGrowthScenariosPercent: [4, 8, 10], // mirrors the plan's own sample illustration scenarios
   // Sourced from data/education.json's Critical Illness Cover rider — a real
   // figure from the policy document, not invented, used as a reference target
@@ -19,7 +18,7 @@ export const COST_ASSUMPTIONS = {
   criticalIllnessCoverReferenceAmountLkr: 3_000_000,
   disclaimer:
     "Education and health cost figures below are rough placeholder assumptions, not verified " +
-    "market data or AIA-guaranteed figures. They must be confirmed with real data before this " +
+    "market data or insurer-guaranteed figures. They must be confirmed with real data before this " +
     "appears in any customer-facing report.",
 };
 
@@ -186,6 +185,60 @@ export const GOVERNMENT_UNIVERSITY_LIVING_SCENARIOS = {
 
 export const GOVERNMENT_UNIVERSITY_LIVING_SOURCE =
   "Operator-provided estimate, confirmed 2026-09-08 — for local government university undergraduates specifically, not fixed prices.";
+
+// Vocational/technical training — treated as free/no separate course fee
+// (operator confirmed 2026-09-09), only recurring living/materials costs.
+export const VOCATIONAL_TRAINING_TUITION_LKR = 0;
+export const VOCATIONAL_TRAINING_TUITION_SOURCE =
+  "Vocational/technical training course fee treated as free/no separate fee (operator confirmed 2026-09-09) " +
+  "— only recurring living/materials costs apply.";
+
+// Representative course duration — operator-confirmed 2026-09-09, a single
+// assumed length (not a range) since vocational course lengths vary widely.
+export const VOCATIONAL_TRAINING_DURATION_YEARS = 1;
+
+export const VOCATIONAL_TRAINING_LIVING_EXPENSE_CATEGORIES = {
+  foodLkrMin: 8_000,
+  foodLkrMax: 14_000,
+  materialsLkrMin: 2_000,
+  materialsLkrMax: 5_000,
+  mobileInternetLkrMin: 1_200,
+  mobileInternetLkrMax: 2_500,
+  miscLkrMin: 1_500,
+  miscLkrMax: 3_500,
+};
+
+// Given directly by the operator as the representative average — not derived
+// from summing the categories above (which sum to a different, wider range).
+export const VOCATIONAL_TRAINING_AVERAGE_MONTHLY_LKR_MIN = 19_000;
+export const VOCATIONAL_TRAINING_AVERAGE_MONTHLY_LKR_MAX = 25_000;
+
+export const VOCATIONAL_TRAINING_LIVING_SOURCE =
+  "Operator-provided estimate, confirmed 2026-09-09 — for vocational/technical training students specifically, not fixed prices.";
+
+// Overseas private university, total 4-year cost breakdown (converted from
+// EUR to LKR by the operator). Confirmed 2026-09-09. The 5 category figures
+// sum exactly to the given grand total — internally consistent, unlike some
+// earlier operator-given figures that used rounded representative averages.
+export const OVERSEAS_DEGREE_COST_BREAKDOWN = {
+  durationYears: 4,
+  tuitionLkrMin: 15_240_000,
+  tuitionLkrMax: 30_480_000,
+  accommodationLkrMin: 7_320_000,
+  accommodationLkrMax: 14_630_000,
+  foodLkrMin: 4_570_000,
+  foodLkrMax: 7_320_000,
+  healthInsuranceLkrMin: 1_830_000,
+  healthInsuranceLkrMax: 2_290_000,
+  transportCommunicationsLkrMin: 1_520_000,
+  transportCommunicationsLkrMax: 2_740_000,
+  grandTotalLkrMin: 30_480_000,
+  grandTotalLkrMax: 57_460_000,
+};
+
+export const OVERSEAS_DEGREE_COST_SOURCE =
+  "Operator-provided estimate (converted from EUR), confirmed 2026-09-09 — for an overseas private " +
+  "university degree over 4 years, not fixed prices and not tied to any specific country/institution.";
 
 export function futureValueOfCostToday(costToday: number, inflationPercent: number, years: number): number {
   return costToday * Math.pow(1 + inflationPercent / 100, years);

@@ -3,10 +3,21 @@
 import { projectChildFuture } from "../lib/pipeline/child-future-projection";
 import type { ChildProfileInput } from "../types/child-profile";
 
+const customerDefaults = {
+  customerName: "Test Customer",
+  customerContactNumber: "0771234567",
+  customerAge: 35,
+  dependentsCount: 1,
+  desiredLifeCoverLkr: null,
+  monthlyBudgetLkr: null,
+  customerHealthFlags: [],
+} satisfies Partial<ChildProfileInput>;
+
 const samples: { label: string; input: ChildProfileInput }[] = [
   {
     label: "12yo, local private degree - Computing & IT",
     input: {
+      ...customerDefaults,
       childName: "Test A",
       childAge: 12,
       province: "Western",
@@ -22,6 +33,7 @@ const samples: { label: string; input: ChildProfileInput }[] = [
   {
     label: "8yo, diabetes flag, competitive swimming, overseas degree",
     input: {
+      ...customerDefaults,
       childName: "Test B",
       childAge: 8,
       province: "Southern",
@@ -37,6 +49,7 @@ const samples: { label: string; input: ChildProfileInput }[] = [
   {
     label: "14yo, local government degree",
     input: {
+      ...customerDefaults,
       childName: "Test D",
       childAge: 14,
       province: "Central",
@@ -50,8 +63,25 @@ const samples: { label: string; input: ChildProfileInput }[] = [
     },
   },
   {
+    label: "17yo, vocational training",
+    input: {
+      ...customerDefaults,
+      childName: "Test E",
+      childAge: 17,
+      province: "Western",
+      householdMonthlyIncomeLkr: 120_000,
+      criticalIllnesses: [],
+      higherEducationPlan: "vocational_training",
+      localPrivateDegreeField: null,
+      sportsPlanDescription: null,
+      sportsMonthlyCostLkr: null,
+      notes: null,
+    },
+  },
+  {
     label: "20yo — already past typical age",
     input: {
+      ...customerDefaults,
       childName: "Test C",
       childAge: 20,
       province: "Central",
@@ -85,5 +115,7 @@ for (const { label, input } of samples) {
   console.log("alCombinedTotal:", p.alCombinedTotal);
   console.log("localPrivateLivingExpenses:", p.localPrivateLivingExpenses);
   console.log("governmentUniversityLivingExpenses:", JSON.stringify(p.governmentUniversityLivingExpenses, null, 2));
+  console.log("vocationalTrainingLivingExpenses:", JSON.stringify(p.vocationalTrainingLivingExpenses, null, 2));
+  console.log("overseasDegreeCostBreakdown:", JSON.stringify(p.overseasDegreeCostBreakdown, null, 2));
   console.log("grandTotal:", p.grandTotal);
 }

@@ -4,12 +4,16 @@ import { createServiceClient } from "@/lib/db/supabase";
 import { projectChildFuture } from "@/lib/pipeline/child-future-projection";
 import { generateChildReportSinhala } from "@/lib/pipeline/generate-child-report-sinhala";
 import type { ChildProfileInput } from "@/types/child-profile";
+import type { ChildFutureProjection } from "@/lib/pipeline/child-future-projection";
 
 export interface SubmitChildProfileResult {
   ok: boolean;
   error?: string;
   id?: string;
   reportSinhala?: string;
+  // All pricing numbers, structured — the client renders these as real tables
+  // instead of relying on the LLM's free-text output for figures.
+  projection?: ChildFutureProjection;
 }
 
 export async function submitChildProfileAndGenerateReport(
@@ -38,6 +42,13 @@ export async function submitChildProfileAndGenerateReport(
   const { data, error } = await supabase
     .from("child_profiles")
     .insert({
+      customer_name: input.customerName,
+      customer_contact_number: input.customerContactNumber,
+      customer_age: input.customerAge,
+      dependents_count: input.dependentsCount,
+      desired_life_cover_lkr: input.desiredLifeCoverLkr,
+      monthly_budget_lkr: input.monthlyBudgetLkr,
+      customer_health_flags: input.customerHealthFlags,
       child_name: input.childName,
       child_age: input.childAge,
       province: input.province,
@@ -61,5 +72,5 @@ export async function submitChildProfileAndGenerateReport(
     return { ok: false, error: error.message };
   }
 
-  return { ok: true, id: data.id, reportSinhala };
+  return { ok: true, id: data.id, reportSinhala, projection };
 }
