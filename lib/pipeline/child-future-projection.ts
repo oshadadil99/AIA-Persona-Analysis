@@ -62,6 +62,7 @@ export interface ChildFutureProjection {
   };
   sports: {
     provided: boolean;
+    monthlyCostLkr: number | null;
     totalProjectedCostLkr: number;
   };
   alTuition: LumpSumProjection & {
@@ -348,6 +349,7 @@ export function projectChildFuture(profile: ChildProfileInput): ChildFutureProje
   const sportsProvided = !!profile.sportsPlanDescription && !!profile.sportsMonthlyCostLkr;
   const sports = {
     provided: sportsProvided,
+    monthlyCostLkr: sportsProvided ? profile.sportsMonthlyCostLkr! : null,
     totalProjectedCostLkr: sportsProvided
       ? Math.round(
           totalOfGrowingAnnualCost(profile.sportsMonthlyCostLkr! * 12, inflation, yearsToHigherEducation),

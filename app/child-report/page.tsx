@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { submitChildProfileAndGenerateReport } from "./actions";
 import PricingTables from "./PricingTables";
 import type { ChildFutureProjection } from "@/lib/pipeline/child-future-projection";
@@ -439,16 +440,36 @@ export default function ChildReportPage() {
                 <p className="whitespace-pre-wrap text-base leading-relaxed">{report}</p>
               </div>
 
-              <button
-                type="button"
-                onClick={handleDownloadPdf}
-                disabled={downloadingPdf}
-                className="mt-5 w-full rounded-lg bg-neutral-900 px-4 py-3 text-sm font-semibold text-white
-                  shadow-sm transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-50
-                  dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200 sm:w-auto"
-              >
-                {downloadingPdf ? "Generating PDF…" : "Download PDF"}
-              </button>
+              <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+                <button
+                  type="button"
+                  onClick={handleDownloadPdf}
+                  disabled={downloadingPdf}
+                  className="w-full rounded-lg bg-neutral-900 px-4 py-3 text-sm font-semibold text-white
+                    shadow-sm transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-50
+                    dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200 sm:w-auto"
+                >
+                  {downloadingPdf ? "Generating PDF…" : "Download PDF"}
+                </button>
+
+                <Link
+                  href="/child-report/plan-benefits"
+                  className="flex w-full items-center justify-center rounded-lg border border-emerald-600 px-4 py-3
+                    text-sm font-semibold text-emerald-700 shadow-sm transition hover:bg-emerald-50
+                    dark:border-emerald-500 dark:text-emerald-400 dark:hover:bg-emerald-900/20 sm:w-auto"
+                >
+                  View AIA Education Plan Benefits →
+                </Link>
+
+                <Link
+                  href="/child-report/health-plan-benefits"
+                  className="flex w-full items-center justify-center rounded-lg border border-emerald-600 px-4 py-3
+                    text-sm font-semibold text-emerald-700 shadow-sm transition hover:bg-emerald-50
+                    dark:border-emerald-500 dark:text-emerald-400 dark:hover:bg-emerald-900/20 sm:w-auto"
+                >
+                  View AIA Health Plan Benefits →
+                </Link>
+              </div>
 
               {pdfError && (
                 <p className="mt-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-300">

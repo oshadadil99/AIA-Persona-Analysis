@@ -12,7 +12,7 @@ export async function renderHtmlToPdf(html: string): Promise<Buffer> {
     const pdf = await page.pdf({
       format: "A4",
       printBackground: true,
-      margin: { top: "16mm", bottom: "16mm", left: "14mm", right: "14mm" },
+      margin: { top: "10mm", bottom: "8mm", left: "10mm", right: "10mm" },
     });
     return Buffer.from(pdf);
   } finally {

@@ -21,3 +21,40 @@ export function perYearRangeFromDurationRange(
 ): string {
   return range(totalMin / durationMax, totalMax / durationMin);
 }
+
+export interface NumRange {
+  min: number;
+  max: number;
+}
+
+export function divideRange(r: NumRange, divisor: number): NumRange {
+  return { min: r.min / divisor, max: r.max / divisor };
+}
+
+export function multiplyRange(r: NumRange, factor: number): NumRange {
+  return { min: r.min * factor, max: r.max * factor };
+}
+
+export function addRanges(a: NumRange, b: NumRange): NumRange {
+  return { min: a.min + b.min, max: a.max + b.max };
+}
+
+// Total over a period whose duration is itself a min-max range: cheapest
+// case is (monthly min x shortest duration), priciest is (monthly max x
+// longest duration).
+export function totalOverDurationRange(monthly: NumRange, durationMin: number, durationMax: number): NumRange {
+  return { min: monthly.min * 12 * durationMin, max: monthly.max * 12 * durationMax };
+}
+
+export function rangeStr(r: NumRange): string {
+  return range(r.min, r.max);
+}
+
+// Inflates a today's-terms range forward by `years` at `inflationPercent`/year
+// — same formula used everywhere else in the pipeline (assumptions.ts's
+// futureValueOfCostToday), duplicated here so display-layer code can apply it
+// per-row without needing the pipeline to precompute every line item.
+export function inflateRange(r: NumRange, inflationPercent: number, years: number): NumRange {
+  const factor = Math.pow(1 + inflationPercent / 100, years);
+  return { min: r.min * factor, max: r.max * factor };
+}
