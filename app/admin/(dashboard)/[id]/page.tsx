@@ -67,7 +67,7 @@ export default async function AdminCustomerDetailPage({ params }: { params: Prom
           <InfoRow label="Name" value={row.child_name} />
           <InfoRow label="Age" value={row.child_age} />
           <InfoRow label="Province" value={row.province} />
-          <InfoRow label="Household monthly income" value={`LKR ${Number(row.household_monthly_income_lkr).toLocaleString()}`} />
+          <InfoRow label="Household monthly expense" value={`LKR ${Number(row.household_monthly_expense_lkr).toLocaleString()}`} />
           <InfoRow label="Higher education plan" value={`${planLabel}${fieldLabel ? ` — ${fieldLabel}` : ""}`} />
           <InfoRow label="Critical illnesses" value={(row.critical_illnesses ?? []).join(", ") || null} />
           <InfoRow

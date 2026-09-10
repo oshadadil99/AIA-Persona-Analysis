@@ -32,6 +32,10 @@ import {
 // a flat today's-terms total x duration figure.
 const COLS_3 = ["අයිතමය", "මාසිකව", "වාර්ෂිකව", "අනාගත ඇස්තමේන්තුව (උද්ධමනය සමග)"];
 
+// University/degree fees are billed per-semester, not monthly — its own
+// columns instead of the generic monthly-based COLS_3. Mirrors PricingTables.tsx.
+const EDUCATION_COLS = ["අයිතමය", "සිමිස්ටර් ගාස්තුව", "වාර්ෂිකව", "කාලසීමාව", "අනාගත ඇස්තමේන්තුව (උද්ධමනය සමග)"];
+
 function overseasRow(
   label: string,
   min: number,
@@ -163,14 +167,14 @@ export function buildReportHtml(
     section(
       "අධ්‍යාපන වියදම්",
       table(
-        COLS_3,
+        EDUCATION_COLS,
         p.education.map((e) => {
           const annual: NumRange = { min: e.perYearCostTodayLkrMin, max: e.perYearCostTodayLkrMax };
-          const monthly = divideRange(annual, 12);
           return [
             `${e.scenario === "overseas_degree" ? "විදේශීය උපාධිය" : "දේශීය"}${e.fieldOfStudyLabel ? ` — ${e.fieldOfStudyLabel}` : ""}`,
-            rangeStr(monthly),
+            e.perSemesterLkrMin != null && e.perSemesterLkrMax != null ? range(e.perSemesterLkrMin, e.perSemesterLkrMax) : "—",
             rangeStr(annual),
+            `${e.durationYearsMin === e.durationYearsMax ? e.durationYearsMin : `${e.durationYearsMin}–${e.durationYearsMax}`} වසර`,
             range(e.projectedCostAtAge19LkrMin, e.projectedCostAtAge19LkrMax),
           ];
         }),
@@ -217,6 +221,7 @@ export function buildReportHtml(
           livingCategoryRow("ආහාර", c.foodLkrMin, c.foodLkrMax, durMin, durMax, inflationPercent, yearsToHigherEd),
           livingCategoryRow("වෙනත් වියදම්", c.miscLkrMin, c.miscLkrMax, durMin, durMax, inflationPercent, yearsToHigherEd),
         ]) +
+          `<p class="scenario-label">සිසුවා සැබවින්ම මසකට වියදම් කරනු ඇති මුදල (How much the student will actually spend per month)</p>` +
           table(
             COLS_3,
             [
@@ -301,6 +306,36 @@ export function buildReportHtml(
           COLS_3,
           [],
           ["අනාගත ඇස්තමේන්තුව", lkr(p.sports.monthlyCostLkr), lkr(p.sports.monthlyCostLkr * 12), lkr(p.sports.totalProjectedCostLkr)],
+        ),
+      ),
+    );
+  }
+
+  {
+    const bi = p.monthlyBudgetImpact;
+    const budgetRows: string[][] = [];
+    if (bi.aLevelPeriod.applicable) {
+      budgetRows.push([
+        `උසස් පෙළ — වසර ${bi.aLevelPeriod.yearsUntilStart}කින්`,
+        lkr(bi.aLevelPeriod.currentMonthlyExpenseLkr),
+        lkr(bi.aLevelPeriod.projectedExpenseLkr),
+        range(bi.aLevelPeriod.projectedNewCostLkrMin, bi.aLevelPeriod.projectedNewCostLkrMax),
+        range(bi.aLevelPeriod.projectedTotalBurdenLkrMin, bi.aLevelPeriod.projectedTotalBurdenLkrMax),
+      ]);
+    }
+    budgetRows.push([
+      `විශ්ව විද්‍යාල කාලය — වසර ${bi.universityPeriod.yearsUntilStart}කින්`,
+      lkr(bi.universityPeriod.currentMonthlyExpenseLkr),
+      lkr(bi.universityPeriod.projectedExpenseLkr),
+      range(bi.universityPeriod.projectedNewCostLkrMin, bi.universityPeriod.projectedNewCostLkrMax),
+      range(bi.universityPeriod.projectedTotalBurdenLkrMin, bi.universityPeriod.projectedTotalBurdenLkrMax),
+    ]);
+    sections.push(
+      section(
+        "මාසික අයවැය බලපෑම",
+        table(
+          ["අදියර", "වර්තමාන වියදම, අද", "එම වියදම අනාගතයේදී (උද්ධමනය සමග)", "නව අධ්‍යාපන වියදම (උද්ධමනය සමග)", "මුළු මාසික බර (උද්ධමනය සමග)"],
+          budgetRows,
         ),
       ),
     );

@@ -99,7 +99,10 @@ export interface ChildProfileInput {
   childName: string | null;
   childAge: number;
   province: Province;
-  householdMonthlyIncomeLkr: number;
+  // Current household monthly expenses (everything EXCEPT this child's future
+  // education costs) — used to show the combined monthly budget burden at
+  // each stage (A/Level, university), not as an income/affordability check.
+  householdMonthlyExpenseLkr: number;
   criticalIllnesses: CriticalIllnessFlag[];
   higherEducationPlan: HigherEducationPlan;
   localPrivateDegreeField: LocalPrivateDegreeField | null;

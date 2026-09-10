@@ -45,6 +45,11 @@ export interface ChildFutureProjection {
     source: string;
     durationYearsMin: number;
     durationYearsMax: number;
+    // Set only when the university bills per-semester (local private degree
+    // with field-specific source data) — null for free/government/vocational
+    // and for overseas (billed annually, not per-semester).
+    perSemesterLkrMin: number | null;
+    perSemesterLkrMax: number | null;
     perYearCostTodayLkrMin: number;
     perYearCostTodayLkrMax: number;
     costTodayLkrMin: number;
@@ -161,6 +166,37 @@ export interface ChildFutureProjection {
     projectedTotalCostLkrMin: number;
     projectedTotalCostLkrMax: number;
   };
+  // How the household's EXISTING monthly expenses combine with the NEW
+  // education-related monthly cost at each stage — shown separately for
+  // A/Level and university since the new cost differs a lot between them.
+  // Both the base expense and the new cost are inflated to the point each
+  // stage actually starts, so they're on the same footing when summed.
+  monthlyBudgetImpact: {
+    aLevelPeriod: {
+      applicable: boolean;
+      yearsUntilStart: number;
+      currentMonthlyExpenseLkr: number;
+      newCostMonthlyLkrMin: number;
+      newCostMonthlyLkrMax: number;
+      projectedExpenseLkr: number;
+      projectedNewCostLkrMin: number;
+      projectedNewCostLkrMax: number;
+      projectedTotalBurdenLkrMin: number;
+      projectedTotalBurdenLkrMax: number;
+    };
+    universityPeriod: {
+      applicable: boolean;
+      yearsUntilStart: number;
+      currentMonthlyExpenseLkr: number;
+      newCostMonthlyLkrMin: number;
+      newCostMonthlyLkrMax: number;
+      projectedExpenseLkr: number;
+      projectedNewCostLkrMin: number;
+      projectedNewCostLkrMax: number;
+      projectedTotalBurdenLkrMin: number;
+      projectedTotalBurdenLkrMax: number;
+    };
+  };
   // Pre-computed sum of the sections above — never let the LLM add these
   // figures together itself.
   grandTotal: {
@@ -231,6 +267,8 @@ export function projectChildFuture(profile: ChildProfileInput): ChildFutureProje
     costTodayLkrMax: number;
     durationYearsMin: number;
     durationYearsMax: number;
+    perSemesterLkrMin: number | null;
+    perSemesterLkrMax: number | null;
   } =
     profile.higherEducationPlan === "local_government_degree"
       ? {
@@ -241,6 +279,8 @@ export function projectChildFuture(profile: ChildProfileInput): ChildFutureProje
           costTodayLkrMax: GOVERNMENT_UNIVERSITY_TUITION_LKR,
           durationYearsMin: GOVERNMENT_DEGREE_DURATION_YEARS_MIN,
           durationYearsMax: GOVERNMENT_DEGREE_DURATION_YEARS_MAX,
+          perSemesterLkrMin: null,
+          perSemesterLkrMax: null,
         }
       : profile.higherEducationPlan === "vocational_training"
         ? {
@@ -251,6 +291,8 @@ export function projectChildFuture(profile: ChildProfileInput): ChildFutureProje
             costTodayLkrMax: VOCATIONAL_TRAINING_TUITION_LKR,
             durationYearsMin: VOCATIONAL_TRAINING_DURATION_YEARS,
             durationYearsMax: VOCATIONAL_TRAINING_DURATION_YEARS,
+            perSemesterLkrMin: null,
+            perSemesterLkrMax: null,
           }
       : localField
         ? {
@@ -261,6 +303,8 @@ export function projectChildFuture(profile: ChildProfileInput): ChildFutureProje
             costTodayLkrMax: localField.totalDegreeLkrMax,
             durationYearsMin: localField.durationYearsMin,
             durationYearsMax: localField.durationYearsMax,
+            perSemesterLkrMin: localField.perSemesterLkrMin,
+            perSemesterLkrMax: localField.perSemesterLkrMax,
           }
         : {
             scenario: "local_degree",
@@ -270,6 +314,8 @@ export function projectChildFuture(profile: ChildProfileInput): ChildFutureProje
             costTodayLkrMax: COST_ASSUMPTIONS.localDegreeCostTodayLkr,
             durationYearsMin: 3,
             durationYearsMax: 4,
+            perSemesterLkrMin: null,
+            perSemesterLkrMax: null,
           };
 
   const scenarios: {
@@ -280,6 +326,8 @@ export function projectChildFuture(profile: ChildProfileInput): ChildFutureProje
     costTodayLkrMax: number;
     durationYearsMin: number;
     durationYearsMax: number;
+    perSemesterLkrMin: number | null;
+    perSemesterLkrMax: number | null;
   }[] = [
     localDegreeScenario,
     {
@@ -290,11 +338,24 @@ export function projectChildFuture(profile: ChildProfileInput): ChildFutureProje
       costTodayLkrMax: OVERSEAS_DEGREE_COST_BREAKDOWN.grandTotalLkrMax,
       durationYearsMin: OVERSEAS_DEGREE_COST_BREAKDOWN.durationYears,
       durationYearsMax: OVERSEAS_DEGREE_COST_BREAKDOWN.durationYears,
+      // Overseas is billed annually, not per-semester.
+      perSemesterLkrMin: null,
+      perSemesterLkrMax: null,
     },
   ];
 
   const education = scenarios.map(
-    ({ scenario, fieldOfStudyLabel, source, costTodayLkrMin, costTodayLkrMax, durationYearsMin, durationYearsMax }) => {
+    ({
+      scenario,
+      fieldOfStudyLabel,
+      source,
+      costTodayLkrMin,
+      costTodayLkrMax,
+      durationYearsMin,
+      durationYearsMax,
+      perSemesterLkrMin,
+      perSemesterLkrMax,
+    }) => {
       const projectedCostAtAge19LkrMin = Math.round(
         futureValueOfCostToday(costTodayLkrMin, inflation, yearsToHigherEducation),
       );
@@ -324,6 +385,8 @@ export function projectChildFuture(profile: ChildProfileInput): ChildFutureProje
         source,
         durationYearsMin,
         durationYearsMax,
+        perSemesterLkrMin,
+        perSemesterLkrMax,
         perYearCostTodayLkrMin,
         perYearCostTodayLkrMax,
         costTodayLkrMin,
@@ -580,6 +643,92 @@ export function projectChildFuture(profile: ChildProfileInput): ChildFutureProje
         ? vocationalTrainingLivingExpenses.projectedTotalCostLkrMax
         : 0;
 
+  // --- Monthly budget impact: existing expense + new education cost, at
+  // each stage, both inflated to the point that stage actually starts. ---
+  const householdExpenseLkr = profile.householdMonthlyExpenseLkr;
+
+  const alNewCostMonthlyLkrMin = alTuition.breakdown.monthlyCostLkrMin + alMaterials.annualCostLkrMin / 12;
+  const alNewCostMonthlyLkrMax = alTuition.breakdown.monthlyCostLkrMax + alMaterials.annualCostLkrMax / 12;
+  const alProjectedExpenseLkr = alTuition.applicable
+    ? Math.round(futureValueOfCostToday(householdExpenseLkr, inflation, yearsUntilALStart))
+    : 0;
+  const alProjectedNewCostLkrMin = alTuition.applicable
+    ? Math.round(futureValueOfCostToday(alNewCostMonthlyLkrMin, inflation, yearsUntilALStart))
+    : 0;
+  const alProjectedNewCostLkrMax = alTuition.applicable
+    ? Math.round(futureValueOfCostToday(alNewCostMonthlyLkrMax, inflation, yearsUntilALStart))
+    : 0;
+
+  const aLevelPeriodBudgetImpact = {
+    applicable: alTuition.applicable,
+    yearsUntilStart: yearsUntilALStart,
+    currentMonthlyExpenseLkr: householdExpenseLkr,
+    newCostMonthlyLkrMin: Math.round(alNewCostMonthlyLkrMin),
+    newCostMonthlyLkrMax: Math.round(alNewCostMonthlyLkrMax),
+    projectedExpenseLkr: alProjectedExpenseLkr,
+    projectedNewCostLkrMin: alProjectedNewCostLkrMin,
+    projectedNewCostLkrMax: alProjectedNewCostLkrMax,
+    projectedTotalBurdenLkrMin: alProjectedExpenseLkr + alProjectedNewCostLkrMin,
+    projectedTotalBurdenLkrMax: alProjectedExpenseLkr + alProjectedNewCostLkrMax,
+  };
+
+  // University-period new cost: tuition (simple per-year average) + living
+  // cost, using whichever living-cost source matches the stated plan —
+  // except overseas, where the sourced grand total already bundles tuition
+  // and living together, so it's used directly instead of summed separately.
+  const uniTuitionMonthlyMin = chosenEducationScenario.perYearCostTodayLkrMin / 12;
+  const uniTuitionMonthlyMax = chosenEducationScenario.perYearCostTodayLkrMax / 12;
+
+  let uniLivingMonthlyMin = 0;
+  let uniLivingMonthlyMax = 0;
+  if (profile.higherEducationPlan === "local_private_degree") {
+    uniLivingMonthlyMin = LOCAL_PRIVATE_LIVING_BUDGET_TIERS.saverLkrMin;
+    uniLivingMonthlyMax = LOCAL_PRIVATE_LIVING_BUDGET_TIERS.moderateLkrMax;
+  } else if (profile.higherEducationPlan === "local_government_degree") {
+    const monthlies = governmentScenarios.map((s) => s.effectiveMonthlyAverageLkr);
+    uniLivingMonthlyMin = Math.min(...monthlies);
+    uniLivingMonthlyMax = Math.max(...monthlies);
+  } else if (profile.higherEducationPlan === "vocational_training") {
+    uniLivingMonthlyMin = VOCATIONAL_TRAINING_AVERAGE_MONTHLY_LKR_MIN;
+    uniLivingMonthlyMax = VOCATIONAL_TRAINING_AVERAGE_MONTHLY_LKR_MAX;
+  }
+
+  const isOverseasPlan = profile.higherEducationPlan === "overseas_degree";
+  const uniNewCostMonthlyLkrMin = isOverseasPlan
+    ? overseasDegreeCostBreakdown.grandTotalTodayLkrMin / (overseasDegreeCostBreakdown.durationYears * 12)
+    : uniTuitionMonthlyMin + uniLivingMonthlyMin;
+  const uniNewCostMonthlyLkrMax = isOverseasPlan
+    ? overseasDegreeCostBreakdown.grandTotalTodayLkrMax / (overseasDegreeCostBreakdown.durationYears * 12)
+    : uniTuitionMonthlyMax + uniLivingMonthlyMax;
+
+  const uniProjectedExpenseLkr = Math.round(
+    futureValueOfCostToday(householdExpenseLkr, inflation, yearsToHigherEducation),
+  );
+  const uniProjectedNewCostLkrMin = Math.round(
+    futureValueOfCostToday(uniNewCostMonthlyLkrMin, inflation, yearsToHigherEducation),
+  );
+  const uniProjectedNewCostLkrMax = Math.round(
+    futureValueOfCostToday(uniNewCostMonthlyLkrMax, inflation, yearsToHigherEducation),
+  );
+
+  const universityPeriodBudgetImpact = {
+    applicable: true,
+    yearsUntilStart: yearsToHigherEducation,
+    currentMonthlyExpenseLkr: householdExpenseLkr,
+    newCostMonthlyLkrMin: Math.round(uniNewCostMonthlyLkrMin),
+    newCostMonthlyLkrMax: Math.round(uniNewCostMonthlyLkrMax),
+    projectedExpenseLkr: uniProjectedExpenseLkr,
+    projectedNewCostLkrMin: uniProjectedNewCostLkrMin,
+    projectedNewCostLkrMax: uniProjectedNewCostLkrMax,
+    projectedTotalBurdenLkrMin: uniProjectedExpenseLkr + uniProjectedNewCostLkrMin,
+    projectedTotalBurdenLkrMax: uniProjectedExpenseLkr + uniProjectedNewCostLkrMax,
+  };
+
+  const monthlyBudgetImpact = {
+    aLevelPeriod: aLevelPeriodBudgetImpact,
+    universityPeriod: universityPeriodBudgetImpact,
+  };
+
   const grandTotal = {
     components: {
       aLevelPeriodProjectedLkrMin: alCombinedTotal.projectedCostLkrMin,
@@ -609,6 +758,7 @@ export function projectChildFuture(profile: ChildProfileInput): ChildFutureProje
     governmentUniversityLivingExpenses,
     overseasDegreeCostBreakdown,
     vocationalTrainingLivingExpenses,
+    monthlyBudgetImpact,
     grandTotal,
   };
 }

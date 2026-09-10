@@ -30,7 +30,7 @@ const emptyForm: ChildProfileInput = {
   childName: "",
   childAge: 0,
   province: "Western",
-  householdMonthlyIncomeLkr: 0,
+  householdMonthlyExpenseLkr: 0,
   criticalIllnesses: [],
   higherEducationPlan: "undecided",
   localPrivateDegreeField: null,
@@ -290,13 +290,13 @@ export default function ChildReportPage() {
               </Field>
             </div>
 
-            <Field label="Household monthly income (LKR)" required>
+            <Field label="Household monthly expense (LKR) — current, excluding this child's education" required>
               <input
                 type="number"
                 required
                 min={0}
-                value={form.householdMonthlyIncomeLkr || ""}
-                onChange={(e) => setForm((f) => ({ ...f, householdMonthlyIncomeLkr: Number(e.target.value) }))}
+                value={form.householdMonthlyExpenseLkr || ""}
+                onChange={(e) => setForm((f) => ({ ...f, householdMonthlyExpenseLkr: Number(e.target.value) }))}
                 className="input"
               />
             </Field>

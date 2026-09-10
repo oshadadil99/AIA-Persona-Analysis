@@ -16,6 +16,17 @@ import {
 // a flat today's-terms total x duration figure.
 const COLS_3 = ["අයිතමය (Item)", "මාසිකව (Monthly)", "වාර්ෂිකව (Annual)", "අනාගත ඇස්තමේන්තුව (Inflation-Adjusted)"];
 
+// University/degree fees are billed per-semester, not monthly — so the
+// education cost table uses its own columns (semester fee, annual, duration,
+// inflation-adjusted total) instead of the generic monthly-based COLS_3.
+const EDUCATION_COLS = [
+  "අයිතමය (Item)",
+  "සිමිස්ටර් ගාස්තුව (Per Semester)",
+  "වාර්ෂිකව (Annual)",
+  "කාලසීමාව (Duration)",
+  "අනාගත ඇස්තමේන්තුව (Total, Inflation-Adjusted)",
+];
+
 export default function PricingTables({ projection }: { projection: ChildFutureProjection }) {
   const p = projection;
   const inflationPercent = p.assumptions.generalCostInflationPercent;
@@ -46,14 +57,14 @@ export default function PricingTables({ projection }: { projection: ChildFutureP
 
       <TableSection title="අධ්‍යාපන වියදම් (Education Cost)">
         <Table
-          headers={COLS_3}
+          headers={EDUCATION_COLS}
           rows={p.education.map((e) => {
             const annual: NumRange = { min: e.perYearCostTodayLkrMin, max: e.perYearCostTodayLkrMax };
-            const monthly = divideRange(annual, 12);
             return [
               `${e.scenario === "overseas_degree" ? "විදේශීය උපාධිය (Overseas)" : "දේශීය (Local)"}${e.fieldOfStudyLabel ? ` — ${e.fieldOfStudyLabel}` : ""}`,
-              rangeStr(monthly),
+              e.perSemesterLkrMin != null && e.perSemesterLkrMax != null ? range(e.perSemesterLkrMin, e.perSemesterLkrMax) : "—",
               rangeStr(annual),
+              `${e.durationYearsMin === e.durationYearsMax ? e.durationYearsMin : `${e.durationYearsMin}–${e.durationYearsMax}`} වසර`,
               range(e.projectedCostAtAge19LkrMin, e.projectedCostAtAge19LkrMax),
             ];
           })}
@@ -91,8 +102,10 @@ export default function PricingTables({ projection }: { projection: ChildFutureP
               livingCategoryRow("වෙනත් වියදම් (Misc)", p.localPrivateLivingExpenses.monthlyCategories.miscLkrMin, p.localPrivateLivingExpenses.monthlyCategories.miscLkrMax, p.localPrivateLivingExpenses.degreeDurationYearsMin, p.localPrivateLivingExpenses.degreeDurationYearsMax, inflationPercent, yearsToHigherEd),
             ]}
           />
+          <p className="mb-1.5 mt-4 text-sm font-medium text-neutral-700 dark:text-neutral-300">
+            සිසුවා සැබවින්ම මසකට වියදම් කරනු ඇති මුදල (How much the student will actually spend per month)
+          </p>
           <Table
-            className="mt-3"
             headers={COLS_3}
             rows={[
               livingCategoryRow("අඩු වියදම් (Saver tier)", p.localPrivateLivingExpenses.budgetTiers.saverLkrMin, p.localPrivateLivingExpenses.budgetTiers.saverLkrMax, p.localPrivateLivingExpenses.degreeDurationYearsMin, p.localPrivateLivingExpenses.degreeDurationYearsMax, inflationPercent, yearsToHigherEd),
@@ -181,6 +194,42 @@ export default function PricingTables({ projection }: { projection: ChildFutureP
           />
         </TableSection>
       )}
+
+      <TableSection title="මාසික අයවැය බලපෑම (Monthly Budget Impact)">
+        <p className="mb-3 text-xs text-neutral-500 dark:text-neutral-400">
+          එකී අදියර ආරම්භ වන අවස්ථාවේ (උද්ධමනය සමග) පවතින මාසික වියදමට අලුතින් එකතු වන අධ්‍යාපන වියදම එකතු කළ විට පවුලේ මුළු මාසික බර (At the point each stage
+          begins, your existing monthly expense plus the new education cost it adds — inflation-adjusted).
+        </p>
+        <Table
+          headers={[
+            "අදියර (Stage)",
+            "වර්තමාන වියදම, අද (Expense Today)",
+            "එම වියදම අනාගතයේදී — උද්ධමනය සමග (Same Expense, Projected)",
+            "නව අධ්‍යාපන වියදම — උද්ධමනය සමග (New Cost, Projected)",
+            "මුළු මාසික බර — උද්ධමනය සමග (Total Burden, Projected)",
+          ]}
+          rows={[
+            ...(p.monthlyBudgetImpact.aLevelPeriod.applicable
+              ? [
+                  [
+                    `උසස් පෙළ (A/Level) — වසර ${p.monthlyBudgetImpact.aLevelPeriod.yearsUntilStart}කින්`,
+                    lkr(p.monthlyBudgetImpact.aLevelPeriod.currentMonthlyExpenseLkr),
+                    lkr(p.monthlyBudgetImpact.aLevelPeriod.projectedExpenseLkr),
+                    range(p.monthlyBudgetImpact.aLevelPeriod.projectedNewCostLkrMin, p.monthlyBudgetImpact.aLevelPeriod.projectedNewCostLkrMax),
+                    range(p.monthlyBudgetImpact.aLevelPeriod.projectedTotalBurdenLkrMin, p.monthlyBudgetImpact.aLevelPeriod.projectedTotalBurdenLkrMax),
+                  ],
+                ]
+              : []),
+            [
+              `විශ්ව විද්‍යාල කාලය (University) — වසර ${p.monthlyBudgetImpact.universityPeriod.yearsUntilStart}කින්`,
+              lkr(p.monthlyBudgetImpact.universityPeriod.currentMonthlyExpenseLkr),
+              lkr(p.monthlyBudgetImpact.universityPeriod.projectedExpenseLkr),
+              range(p.monthlyBudgetImpact.universityPeriod.projectedNewCostLkrMin, p.monthlyBudgetImpact.universityPeriod.projectedNewCostLkrMax),
+              range(p.monthlyBudgetImpact.universityPeriod.projectedTotalBurdenLkrMin, p.monthlyBudgetImpact.universityPeriod.projectedTotalBurdenLkrMax),
+            ],
+          ]}
+        />
+      </TableSection>
 
       <TableSection title="සමස්ත සාරාංශය (Grand Total Summary)" highlight>
         <Table

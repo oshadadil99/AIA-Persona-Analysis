@@ -22,8 +22,8 @@ export async function submitChildProfileAndGenerateReport(
   if (!Number.isFinite(input.childAge) || input.childAge < 0) {
     return { ok: false, error: "Child's age must be a non-negative number." };
   }
-  if (!Number.isFinite(input.householdMonthlyIncomeLkr) || input.householdMonthlyIncomeLkr < 0) {
-    return { ok: false, error: "Household monthly income must be a non-negative number." };
+  if (!Number.isFinite(input.householdMonthlyExpenseLkr) || input.householdMonthlyExpenseLkr < 0) {
+    return { ok: false, error: "Household monthly expense must be a non-negative number." };
   }
 
   const supabase = createServiceClient();
@@ -52,7 +52,7 @@ export async function submitChildProfileAndGenerateReport(
       child_name: input.childName,
       child_age: input.childAge,
       province: input.province,
-      household_monthly_income_lkr: input.householdMonthlyIncomeLkr,
+      household_monthly_expense_lkr: input.householdMonthlyExpenseLkr,
       critical_illnesses: input.criticalIllnesses,
       higher_education_plan: input.higherEducationPlan,
       local_private_degree_field: input.localPrivateDegreeField,
