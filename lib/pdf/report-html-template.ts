@@ -36,6 +36,11 @@ const COLS_3 = ["අයිතමය", "මාසිකව", "වාර්ෂි�
 // columns instead of the generic monthly-based COLS_3. Mirrors PricingTables.tsx.
 const EDUCATION_COLS = ["අයිතමය", "සිමිස්ටර් ගාස්තුව", "වාර්ෂිකව", "කාලසීමාව", "අනාගත ඇස්තමේන්තුව (උද්ධමනය සමග)"];
 
+// The A/Level "Annual" figure is ONE year — but the period itself runs
+// ~2.5 years, so its inflation-adjusted total is the whole-period cost, not
+// the annual figure just inflated. Mirrors PricingTables.tsx's AL_COLS.
+const AL_COLS = ["අයිතමය", "මාසිකව", "වාර්ෂිකව (1 වසර)", "මුළු කාලසීමාව (~2.5 වසර, අද මිලට)", "අනාගත ඇස්තමේන්තුව (මුළු කාලසීමාව, උද්ධමනය සමග)"];
+
 function overseasRow(
   label: string,
   min: number,
@@ -150,14 +155,32 @@ export function buildReportHtml(
   if (p.alTuition.applicable) {
     sections.push(
       section(
-        "උසස් පෙළ (A/Level) කාලය තුළ වියදම්",
+        "උසස් පෙළ (A/Level) කාලය තුළ වියදම් — මුළු කාලසීමාව වසර 2.5ක් පමණ",
         table(
-          COLS_3,
+          AL_COLS,
           [
-            ["උපකාරක පන්ති", rangeStr(tuitionMonthly), rangeStr(tuitionAnnual), range(p.alTuition.projectedCostLkrMin, p.alTuition.projectedCostLkrMax)],
-            ["ඉගෙනුම් ද්‍රව්‍ය", rangeStr(materialsMonthly), rangeStr(materialsAnnual), range(p.alMaterials.projectedCostLkrMin, p.alMaterials.projectedCostLkrMax)],
+            [
+              "උපකාරක පන්ති",
+              rangeStr(tuitionMonthly),
+              rangeStr(tuitionAnnual),
+              range(p.alTuition.totalCostTodayLkrMin, p.alTuition.totalCostTodayLkrMax),
+              range(p.alTuition.projectedCostLkrMin, p.alTuition.projectedCostLkrMax),
+            ],
+            [
+              "ඉගෙනුම් ද්‍රව්‍ය",
+              rangeStr(materialsMonthly),
+              rangeStr(materialsAnnual),
+              range(p.alMaterials.totalCostTodayLkrMin, p.alMaterials.totalCostTodayLkrMax),
+              range(p.alMaterials.projectedCostLkrMin, p.alMaterials.projectedCostLkrMax),
+            ],
           ],
-          ["එකතුව", rangeStr(alTotalMonthly), rangeStr(alTotalAnnual), range(p.alCombinedTotal.projectedCostLkrMin, p.alCombinedTotal.projectedCostLkrMax)],
+          [
+            "එකතුව",
+            rangeStr(alTotalMonthly),
+            rangeStr(alTotalAnnual),
+            range(p.alCombinedTotal.totalCostTodayLkrMin, p.alCombinedTotal.totalCostTodayLkrMax),
+            range(p.alCombinedTotal.projectedCostLkrMin, p.alCombinedTotal.projectedCostLkrMax),
+          ],
         ),
       ),
     );

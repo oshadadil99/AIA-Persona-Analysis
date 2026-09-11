@@ -27,6 +27,19 @@ const EDUCATION_COLS = [
   "අනාගත ඇස්තමේන්තුව (Total, Inflation-Adjusted)",
 ];
 
+// The A/Level "Annual" figure is ONE year — but the period itself runs
+// ~2.5 years, so its inflation-adjusted total is the whole-period cost, not
+// the annual figure just inflated. Both scope changes (1yr -> ~2.5yr,
+// today's terms -> inflation-adjusted) need to be visible, or the total
+// looks like an unexplained multiplier on the annual figure.
+const AL_COLS = [
+  "අයිතමය (Item)",
+  "මාසිකව (Monthly)",
+  "වාර්ෂිකව (Annual, 1 වසර)",
+  "මුළු කාලසීමාව (~2.5 වසර, අද මිලට)",
+  "අනාගත ඇස්තමේන්තුව (මුළු කාලසීමාව, උද්ධමනය සමග)",
+];
+
 export default function PricingTables({ projection }: { projection: ChildFutureProjection }) {
   const p = projection;
   const inflationPercent = p.assumptions.generalCostInflationPercent;
@@ -43,14 +56,32 @@ export default function PricingTables({ projection }: { projection: ChildFutureP
   return (
     <div className="space-y-8">
       {p.alTuition.applicable && (
-        <TableSection title="උසස් පෙළ (A/Level) කාලය තුළ වියදම්">
+        <TableSection title="උසස් පෙළ (A/Level) කාලය තුළ වියදම් — මුළු කාලසීමාව වසර 2.5ක් පමණ">
           <Table
-            headers={COLS_3}
+            headers={AL_COLS}
             rows={[
-              ["උපකාරක පන්ති (Tuition classes)", rangeStr(tuitionMonthly), rangeStr(tuitionAnnual), range(p.alTuition.projectedCostLkrMin, p.alTuition.projectedCostLkrMax)],
-              ["ඉගෙනුම් ද්‍රව්‍ය (Learning materials)", rangeStr(materialsMonthly), rangeStr(materialsAnnual), range(p.alMaterials.projectedCostLkrMin, p.alMaterials.projectedCostLkrMax)],
+              [
+                "උපකාරක පන්ති (Tuition classes)",
+                rangeStr(tuitionMonthly),
+                rangeStr(tuitionAnnual),
+                range(p.alTuition.totalCostTodayLkrMin, p.alTuition.totalCostTodayLkrMax),
+                range(p.alTuition.projectedCostLkrMin, p.alTuition.projectedCostLkrMax),
+              ],
+              [
+                "ඉගෙනුම් ද්‍රව්‍ය (Learning materials)",
+                rangeStr(materialsMonthly),
+                rangeStr(materialsAnnual),
+                range(p.alMaterials.totalCostTodayLkrMin, p.alMaterials.totalCostTodayLkrMax),
+                range(p.alMaterials.projectedCostLkrMin, p.alMaterials.projectedCostLkrMax),
+              ],
             ]}
-            totalRow={["එකතුව (Total)", rangeStr(alTotalMonthly), rangeStr(alTotalAnnual), range(p.alCombinedTotal.projectedCostLkrMin, p.alCombinedTotal.projectedCostLkrMax)]}
+            totalRow={[
+              "එකතුව (Total)",
+              rangeStr(alTotalMonthly),
+              rangeStr(alTotalAnnual),
+              range(p.alCombinedTotal.totalCostTodayLkrMin, p.alCombinedTotal.totalCostTodayLkrMax),
+              range(p.alCombinedTotal.projectedCostLkrMin, p.alCombinedTotal.projectedCostLkrMax),
+            ]}
           />
         </TableSection>
       )}

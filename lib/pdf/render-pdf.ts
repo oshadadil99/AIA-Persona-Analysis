@@ -25,6 +25,20 @@ async function launchBrowser(): Promise<Browser> {
   return puppeteer.launch({ headless: true }) as unknown as Browser;
 }
 
+// Repeats on every page via Puppeteer's header/footer template mechanism —
+// content in the page body itself only flows once across page breaks, it
+// doesn't re-render per page, so a per-page contact bar has to go through
+// this API instead. Chromium renders header/footer templates in a very
+// limited CSS environment (no external stylesheets, no @font-face), so this
+// stays plain inline-styled HTML in a Latin font.
+const CONTACT_HEADER_TEMPLATE = `
+  <div style="width:100%; font-size:8px; font-family:Arial,Helvetica,sans-serif;
+    color:#065f46; background-color:#d1fae5; padding:3px 10mm; box-sizing:border-box;
+    text-align:center; -webkit-print-color-adjust:exact;">
+    <span style="font-weight:700;">Oshada Dilshan</span>&nbsp;&nbsp;|&nbsp;&nbsp;0703633032&nbsp;&nbsp;|&nbsp;&nbsp;oshadasayakkara@gmail.com
+  </div>
+`;
+
 export async function renderHtmlToPdf(html: string): Promise<Buffer> {
   const browser = await launchBrowser();
   try {
@@ -34,7 +48,12 @@ export async function renderHtmlToPdf(html: string): Promise<Buffer> {
     const pdf = await page.pdf({
       format: "A4",
       printBackground: true,
-      margin: { top: "10mm", bottom: "8mm", left: "10mm", right: "10mm" },
+      // Top margin enlarged to fit the contact header bar without it
+      // overlapping the report content.
+      margin: { top: "16mm", bottom: "8mm", left: "10mm", right: "10mm" },
+      displayHeaderFooter: true,
+      headerTemplate: CONTACT_HEADER_TEMPLATE,
+      footerTemplate: "<span></span>",
     });
     return Buffer.from(pdf);
   } finally {

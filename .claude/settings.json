@@ -5,7 +5,13 @@
       "Bash(curl -s -b operator_session=__TRACKED_VAR__ http://localhost:3000/admin -o /tmp/admin-page2.html --max-time 10)",
       "Bash(grep -o \"Oshada Dilshan.\\\\{0,2000\\\\}\" /tmp/admin-page2.html)",
       "Bash(grep -o \"bg-amber-100.\\\\{0,150\\\\}\" /tmp/admin-page2.html)",
-      "Bash(grep -o \"bg-amber-100.\\\\{0,300\\\\}\")"
+      "Bash(grep -o \"bg-amber-100.\\\\{0,300\\\\}\")",
+      "Bash(pdftotext -layout scripts/tmp-header-test.pdf -)",
+      "Bash(pdftotext scripts/tmp-header-test.pdf -)",
+      "Bash(pdftotext -f 4 -l 4 -layout scripts/tmp-header-test.pdf -)",
+      "Bash(node -e ' *)",
+      "Bash(pdftotext -layout scripts/tmp-al-labels.pdf -)",
+      "Bash(pdftotext scripts/tmp-al-labels.pdf -)"
     ]
   }
 }
