@@ -10,13 +10,17 @@ interface RowSummary {
   child_name: string | null;
   created_at: string;
   report_sinhala: string | null;
+  household_monthly_expense_lkr: number | null;
+  household_monthly_savings_lkr: number | null;
 }
 
 export default async function AdminDashboardPage() {
   const supabase = createServiceClient();
   const { data, error } = await supabase
     .from("child_profiles")
-    .select("id, customer_name, customer_contact_number, child_name, created_at, report_sinhala")
+    .select(
+      "id, customer_name, customer_contact_number, child_name, created_at, report_sinhala, household_monthly_expense_lkr, household_monthly_savings_lkr",
+    )
     .order("created_at", { ascending: false });
 
   const rows = (data ?? []) as RowSummary[];

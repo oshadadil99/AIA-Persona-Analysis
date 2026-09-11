@@ -13,6 +13,17 @@ interface RowSummary {
   child_name: string | null;
   created_at: string;
   report_sinhala: string | null;
+  household_monthly_expense_lkr: number | null;
+  household_monthly_savings_lkr: number | null;
+}
+
+// Suggested affordable premium — 10% of (monthly expense + monthly savings),
+// confirmed 2026-09-11. Missing savings is treated as 0 rather than blocking
+// the estimate, since expense is the only field required at intake.
+function suggestedPremiumLkr(row: RowSummary): number | null {
+  if (row.household_monthly_expense_lkr == null) return null;
+  const base = row.household_monthly_expense_lkr + (row.household_monthly_savings_lkr ?? 0);
+  return Math.round(base * 0.1);
 }
 
 export default function AdminRecordsTable({ rows }: { rows: RowSummary[] }) {
@@ -106,6 +117,9 @@ export default function AdminRecordsTable({ rows }: { rows: RowSummary[] }) {
                 Child&apos;s Name
               </th>
               <th className="px-4 py-3 text-left font-medium text-neutral-600 dark:text-neutral-400">Date</th>
+              <th className="px-4 py-3 text-left font-medium text-neutral-600 dark:text-neutral-400">
+                Suggested Premium
+              </th>
               <th className="px-4 py-3 text-right font-medium text-neutral-600 dark:text-neutral-400">Actions</th>
             </tr>
           </thead>
@@ -134,6 +148,21 @@ export default function AdminRecordsTable({ rows }: { rows: RowSummary[] }) {
                   })}
                 </td>
                 <td className="px-4 py-3">
+                  {(() => {
+                    const premium = suggestedPremiumLkr(row);
+                    return premium != null ? (
+                      <span
+                        className="inline-block rounded-full bg-amber-100 px-2.5 py-1 text-sm font-semibold
+                          text-amber-800 dark:bg-amber-900/40 dark:text-amber-300"
+                      >
+                        LKR {premium.toLocaleString()}/mo
+                      </span>
+                    ) : (
+                      <span className="text-sm text-neutral-400">—</span>
+                    );
+                  })()}
+                </td>
+                <td className="px-4 py-3">
                   <div className="flex items-center justify-end gap-4">
                     {row.report_sinhala ? (
                       <a
@@ -159,7 +188,7 @@ export default function AdminRecordsTable({ rows }: { rows: RowSummary[] }) {
 
             {rows.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-sm text-neutral-500">
+                <td colSpan={7} className="px-4 py-8 text-center text-sm text-neutral-500">
                   No customer records yet.
                 </td>
               </tr>
