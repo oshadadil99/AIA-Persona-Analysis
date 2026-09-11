@@ -32,10 +32,17 @@ async function launchBrowser(): Promise<Browser> {
 // limited CSS environment (no external stylesheets, no @font-face), so this
 // stays plain inline-styled HTML in a Latin font.
 const CONTACT_HEADER_TEMPLATE = `
-  <div style="width:100%; font-size:8px; font-family:Arial,Helvetica,sans-serif;
-    color:#065f46; background-color:#d1fae5; padding:3px 10mm; box-sizing:border-box;
-    text-align:center; -webkit-print-color-adjust:exact;">
-    <span style="font-weight:700;">Oshada Dilshan</span>&nbsp;&nbsp;|&nbsp;&nbsp;0703633032&nbsp;&nbsp;|&nbsp;&nbsp;oshadasayakkara@gmail.com
+  <div style="width:100%; font-family:Arial,Helvetica,sans-serif; padding:5px 10mm 2px;
+    box-sizing:border-box; -webkit-print-color-adjust:exact;">
+    <div style="display:flex; align-items:center; justify-content:center; gap:9px;
+      width:fit-content; margin:0 auto; background-color:#ecfdf5; border:1px solid #a7f3d0;
+      border-radius:999px; padding:4px 16px;">
+      <span style="font-size:9px; font-weight:700; color:#047857;">Oshada Dilshan</span>
+      <span style="font-size:7px; color:#6ee7b7;">&#9679;</span>
+      <span style="font-size:8.5px; color:#065f46;">0703633032</span>
+      <span style="font-size:7px; color:#6ee7b7;">&#9679;</span>
+      <span style="font-size:8.5px; color:#065f46;">oshadasayakkara@gmail.com</span>
+    </div>
   </div>
 `;
 

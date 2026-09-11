@@ -36,18 +36,19 @@ STRICT RULES:
 - Clearly state, once, that these cost/inflation figures are assumptions, not guaranteed facts.
 - Tone: friendly, empathetic, encouraging — warm, polite Sri Lankan style, conversational yet respectful.
   Constructive and informative, not fear-based or overwhelming.
-- End with this exact closing statement:
-  "මෙය පරිගණකයක් මගින් සකස් කරන ලද දළ වාර්තාවක් (computer-generated indicative report) වන අතර, අවසාන සංඛ්‍යාලේඛන සහ මූල්‍ය උපදෙස් සඳහා බලපත්‍රලාභී මූල්‍ය උපදේශකයෙකු හමු වී තහවුරු කරගන්න."
+- Do NOT state or hint anywhere that this is a computer-generated/automated/indicative report, and do NOT
+  tell the reader to go confirm the figures with a licensed financial advisor. The operator delivers this
+  report in person and does not want that closing caveat in the text.
 
 FACTS (for context only — do not restate these as a list; the reader already sees them in the tables above):
 ${facts}
 
-Write a short piece (roughly 4-7 sentences total, 2-3 short paragraphs) covering: (1) a warm opening
+Write a short piece (roughly 4-6 sentences total, 2-3 short paragraphs) covering: (1) a warm opening
 acknowledging the family's planning for the child's future, naming the stated higher-education plan in one
 line, (2) one sentence referencing the Grand Total range as the headline takeaway, (3) a brief, encouraging
-note about planning ahead (mention the health/sports facts only if they were flagged as applicable), (4) the
-required closing statement above. Do not add section headings or numbered sections — this is a short
-connective narrative, not a structured report.`;
+closing note about planning ahead (mention the health/sports facts only if they were flagged as applicable).
+Do not add section headings or numbered sections — this is a short connective narrative, not a structured
+report.`;
 
   const result = await callGemini(prompt);
   const text = result?.candidates?.[0]?.content?.parts?.[0]?.text;
@@ -88,7 +89,7 @@ function buildFactsBlock(profile: ChildProfileInput, projection: ChildFutureProj
   for (const e of projection.education) {
     const label = e.fieldOfStudyLabel ? ` (${e.fieldOfStudyLabel})` : "";
     lines.push(
-      `Scenario "${e.scenario}"${label}: cost range today = LKR ${e.costTodayLkrMin.toLocaleString()}-${e.costTodayLkrMax.toLocaleString()}. ` +
+      `Scenario "${e.categoryLabel}"${label} (over ${e.durationYearsMin}-${e.durationYearsMax} years): cost range today = LKR ${e.costTodayLkrMin.toLocaleString()}-${e.costTodayLkrMax.toLocaleString()}. ` +
         `Projected cost range at age 19 (inflation-adjusted) = LKR ${e.projectedCostAtAge19LkrMin.toLocaleString()}-${e.projectedCostAtAge19LkrMax.toLocaleString()}. ` +
         `Source: ${e.source} ` +
         `Required monthly saving (to cover the upper end of the range) by assumed investment growth rate: ${Object.entries(

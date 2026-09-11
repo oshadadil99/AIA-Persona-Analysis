@@ -41,6 +41,10 @@ export interface ChildFutureProjection {
   assumptions: typeof COST_ASSUMPTIONS;
   education: {
     scenario: "local_degree" | "overseas_degree";
+    // Which institution type this cost row is actually for — "local_degree"
+    // alone is ambiguous (government vs private vs vocational all use it),
+    // and a cost figure means nothing without knowing which of those it is.
+    categoryLabel: string;
     fieldOfStudyLabel: string | null; // set when local_degree uses field-specific data
     source: string;
     durationYearsMin: number;
@@ -208,6 +212,9 @@ export interface ChildFutureProjection {
       livingCostProjectedLkrMin: number;
       livingCostProjectedLkrMax: number;
     };
+    aLevelPeriodYears: number;
+    degreeDurationYearsMin: number;
+    degreeDurationYearsMax: number;
     projectedTotalLkrMin: number;
     projectedTotalLkrMax: number;
   };
@@ -261,6 +268,7 @@ export function projectChildFuture(profile: ChildProfileInput): ChildFutureProje
 
   const localDegreeScenario: {
     scenario: "local_degree";
+    categoryLabel: string;
     fieldOfStudyLabel: string | null;
     source: string;
     costTodayLkrMin: number;
@@ -273,6 +281,7 @@ export function projectChildFuture(profile: ChildProfileInput): ChildFutureProje
     profile.higherEducationPlan === "local_government_degree"
       ? {
           scenario: "local_degree",
+          categoryLabel: "දේශීය රජයේ විශ්වවිද්‍යාලය (Local Government University)",
           fieldOfStudyLabel: null,
           source: GOVERNMENT_UNIVERSITY_TUITION_SOURCE,
           costTodayLkrMin: GOVERNMENT_UNIVERSITY_TUITION_LKR,
@@ -285,6 +294,7 @@ export function projectChildFuture(profile: ChildProfileInput): ChildFutureProje
       : profile.higherEducationPlan === "vocational_training"
         ? {
             scenario: "local_degree",
+            categoryLabel: "වෘත්තීය/තාක්ෂණික පුහුණුව (Vocational / Technical Training)",
             fieldOfStudyLabel: null,
             source: VOCATIONAL_TRAINING_TUITION_SOURCE,
             costTodayLkrMin: VOCATIONAL_TRAINING_TUITION_LKR,
@@ -297,6 +307,7 @@ export function projectChildFuture(profile: ChildProfileInput): ChildFutureProje
       : localField
         ? {
             scenario: "local_degree",
+            categoryLabel: "දේශීය පෞද්ගලික විශ්වවිද්‍යාලය (Local Private University)",
             fieldOfStudyLabel: localField.label,
             source: LOCAL_PRIVATE_DEGREE_COST_SOURCE,
             costTodayLkrMin: localField.totalDegreeLkrMin,
@@ -308,6 +319,7 @@ export function projectChildFuture(profile: ChildProfileInput): ChildFutureProje
           }
         : {
             scenario: "local_degree",
+            categoryLabel: "දේශීය උපාධිය (Local Degree)",
             fieldOfStudyLabel: null,
             source: COST_ASSUMPTIONS.disclaimer,
             costTodayLkrMin: COST_ASSUMPTIONS.localDegreeCostTodayLkr,
@@ -320,6 +332,7 @@ export function projectChildFuture(profile: ChildProfileInput): ChildFutureProje
 
   const scenarios: {
     scenario: "local_degree" | "overseas_degree";
+    categoryLabel: string;
     fieldOfStudyLabel: string | null;
     source: string;
     costTodayLkrMin: number;
@@ -332,6 +345,7 @@ export function projectChildFuture(profile: ChildProfileInput): ChildFutureProje
     localDegreeScenario,
     {
       scenario: "overseas_degree",
+      categoryLabel: "විදේශීය විශ්වවිද්‍යාලය (Foreign University)",
       fieldOfStudyLabel: null,
       source: OVERSEAS_DEGREE_COST_SOURCE,
       costTodayLkrMin: OVERSEAS_DEGREE_COST_BREAKDOWN.grandTotalLkrMin,
@@ -347,6 +361,7 @@ export function projectChildFuture(profile: ChildProfileInput): ChildFutureProje
   const education = scenarios.map(
     ({
       scenario,
+      categoryLabel,
       fieldOfStudyLabel,
       source,
       costTodayLkrMin,
@@ -381,6 +396,7 @@ export function projectChildFuture(profile: ChildProfileInput): ChildFutureProje
 
       return {
         scenario,
+        categoryLabel,
         fieldOfStudyLabel,
         source,
         durationYearsMin,
@@ -738,6 +754,12 @@ export function projectChildFuture(profile: ChildProfileInput): ChildFutureProje
       livingCostProjectedLkrMin,
       livingCostProjectedLkrMax,
     },
+    // How long each component's spending actually runs for — every figure in
+    // the report is shown with both when it starts and how long it lasts, and
+    // the summary rows would otherwise be the one place without that.
+    aLevelPeriodYears: A_LEVEL_PERIOD_YEARS,
+    degreeDurationYearsMin: chosenEducationScenario.durationYearsMin,
+    degreeDurationYearsMax: chosenEducationScenario.durationYearsMax,
     projectedTotalLkrMin:
       alCombinedTotal.projectedCostLkrMin + chosenEducationScenario.projectedCostAtAge19LkrMin + livingCostProjectedLkrMin,
     projectedTotalLkrMax:

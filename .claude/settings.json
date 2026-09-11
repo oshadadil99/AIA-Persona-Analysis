@@ -11,7 +11,17 @@
       "Bash(pdftotext -f 4 -l 4 -layout scripts/tmp-header-test.pdf -)",
       "Bash(node -e ' *)",
       "Bash(pdftotext -layout scripts/tmp-al-labels.pdf -)",
-      "Bash(pdftotext scripts/tmp-al-labels.pdf -)"
+      "Bash(pdftotext scripts/tmp-al-labels.pdf -)",
+      "Bash(pdftotext -layout scripts/tmp-timeperiod-header.pdf -)",
+      "Bash(pdftotext scripts/tmp-timeperiod-header.pdf -)",
+      "Bash(grep -o \"සමස්ත සාරාංශය.\\\\{0,400\\\\}\" scripts/tmp-report.html)",
+      "Bash(grep -o \"සමස්ත සාරාංශය.\\\\{0,700\\\\}\" scripts/tmp-local_private.html)",
+      "Bash(pdftotext scripts/tmp-final.pdf -)",
+      "Bash(pdftotext -layout scripts/tmp-final.pdf -)",
+      "Bash(cd \"F:\\\\My Projects\\\\AIA-Persona-Analysis\" && rm -f scripts/test-changes-verify.ts scripts/test-final-pdf.ts scripts/tmp-*.html scripts/tmp-final.pdf && git status --short)"
+    ],
+    "additionalDirectories": [
+      "F:\\My Projects\\AIA-Persona-Analysis\\scripts"
     ]
   }
 }
