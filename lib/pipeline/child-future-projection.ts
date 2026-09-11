@@ -38,6 +38,13 @@ interface LumpSumProjection {
 export interface ChildFutureProjection {
   yearsToHigherEducation: number;
   alreadyPastTypicalAge: boolean;
+  // Calendar year this projection was computed in, plus the ages the child
+  // reaches each milestone. Stored with the projection rather than derived at
+  // render time so a report re-opened months later still names the same years
+  // as the LKR figures that were locked in alongside it.
+  baseYear: number;
+  aLevelStartAge: number;
+  universityStartAge: number;
   assumptions: typeof COST_ASSUMPTIONS;
   education: {
     scenario: "local_degree" | "overseas_degree";
@@ -770,6 +777,9 @@ export function projectChildFuture(profile: ChildProfileInput): ChildFutureProje
   return {
     yearsToHigherEducation,
     alreadyPastTypicalAge,
+    baseYear: new Date().getFullYear(),
+    aLevelStartAge: A_LEVEL_TUITION_ASSUMPTIONS.typicalStartAge,
+    universityStartAge: TYPICAL_HIGHER_EDUCATION_AGE,
     assumptions: COST_ASSUMPTIONS,
     education,
     healthRisk,

@@ -58,6 +58,49 @@ export function yearsLabel(min: number, max: number): string {
   return min === max ? `වසර ${min}ක්` : `වසර ${min}–${max}ක්`;
 }
 
+// Header for the near-term reference column: one year of this cost, with one
+// year of inflation applied. Names the actual calendar year rather than
+// saying "in 1 year" — a concrete year is easier to place than a relative
+// one. Shared by the on-screen tables and the PDF so both read identically.
+export function oneYearCostHeader(inflationPercent: number, year: number): string {
+  return `${year} වන විට උද්ධමනය සමග වසර 1ක වියදම (1-Year Cost, +${inflationPercent}%)`;
+}
+
+export interface Milestone {
+  year: number;
+  age: number;
+}
+
+export interface ReportTimeline {
+  oneYearAhead: number;
+  aLevel: Milestone;
+  university: Milestone;
+}
+
+// Turns the projection's stored base year + milestone ages into the concrete
+// calendar years each stage falls in. Projections saved before those fields
+// existed fall back to today's year and Sri Lanka's standard milestone ages,
+// so re-opening an old record doesn't print "undefined".
+export function buildTimeline(opts: {
+  baseYear?: number;
+  aLevelStartAge?: number;
+  universityStartAge?: number;
+  aLevelYearsFromNow: number;
+  universityYearsFromNow: number;
+}): ReportTimeline {
+  const baseYear = opts.baseYear ?? new Date().getFullYear();
+  return {
+    oneYearAhead: baseYear + 1,
+    aLevel: { year: baseYear + opts.aLevelYearsFromNow, age: opts.aLevelStartAge ?? 17 },
+    university: { year: baseYear + opts.universityYearsFromNow, age: opts.universityStartAge ?? 19 },
+  };
+}
+
+// "2033 වන විට (වයස 17)" — when the stage starts, and how old the child is.
+export function milestoneLabel(m: Milestone): string {
+  return `${m.year} වන විට (වයස ${m.age})`;
+}
+
 // Inflates a today's-terms range forward by `years` at `inflationPercent`/year
 // — same formula used everywhere else in the pipeline (assumptions.ts's
 // futureValueOfCostToday), duplicated here so display-layer code can apply it
