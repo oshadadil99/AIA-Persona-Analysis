@@ -11,6 +11,10 @@ import {
   totalOverDurationRange,
   inflateRange,
   yearsLabel,
+  buildTimeline,
+  milestoneLabel,
+  type ReportTimeline,
+  oneYearCostHeader,
   type NumRange,
 } from "@/lib/format";
 import {
@@ -34,47 +38,40 @@ import {
 // inflation is compounded over is embedded in the header itself — every
 // pricing table must state the time period its projection is based on.
 // Mirrors PricingTables.tsx's cols3()/educationCols()/alCols().
-function cols3(yearsUntilStart: number, durationLabel: string, inflationPercent: number): string[] {
+function cols3(t: ReportTimeline, durationLabel: string, inflationPercent: number): string[] {
   return [
     "අයිතමය",
     "මාසිකව",
     "වාර්ෂිකව",
-    oneYearHeader(inflationPercent),
-    `අනාගත ඇස්තමේන්තුව — වසර ${yearsUntilStart}කින් පසු, ${durationLabel} සඳහා (උද්ධමනය සමග)`,
+    oneYearCostHeader(inflationPercent, t.oneYearAhead),
+    `අනාගත ඇස්තමේන්තුව — ${milestoneLabel(t.university)}, ${durationLabel} සඳහා (උද්ධමනය සමග)`,
   ];
-}
-
-// Near-term reference point: what ONE year of this item costs a year from
-// now. Deliberately separate from the far-future projection — a figure the
-// family can sanity-check against next year's actual spending.
-function oneYearHeader(inflationPercent: number): string {
-  return `වසර 1ක වියදම — වසර 1ක උද්ධමනය සමග (1-Year, +${inflationPercent}%)`;
 }
 
 // University/degree fees are billed per-semester, not monthly — its own
 // columns instead of the generic monthly-based cols3().
-function educationCols(yearsUntilStart: number, inflationPercent: number): string[] {
+function educationCols(t: ReportTimeline, inflationPercent: number): string[] {
   return [
     "අධ්‍යාපන ප්‍රවර්ගය (Category)",
     "සෙමෙස්ටර් ගාස්තුව (Per Semester)",
     "වාර්ෂිකව",
-    oneYearHeader(inflationPercent),
+    oneYearCostHeader(inflationPercent, t.oneYearAhead),
     "කාලසීමාව",
-    `අනාගත ඇස්තමේන්තුව — වසර ${yearsUntilStart}කින් පසු, මුළු පාඨමාලාව සඳහා (උද්ධමනය සමග)`,
+    `අනාගත ඇස්තමේන්තුව — ${milestoneLabel(t.university)}, මුළු පාඨමාලාව සඳහා (උද්ධමනය සමග)`,
   ];
 }
 
 // The A/Level "Annual" figure is ONE year — but the period itself runs
 // ~2.5 years, so its inflation-adjusted total is the whole-period cost, not
 // the annual figure just inflated.
-function alCols(yearsUntilStart: number, inflationPercent: number): string[] {
+function alCols(t: ReportTimeline, inflationPercent: number): string[] {
   return [
     "අයිතමය",
     "මාසිකව",
     "වාර්ෂිකව (1 වසර)",
-    oneYearHeader(inflationPercent),
+    oneYearCostHeader(inflationPercent, t.oneYearAhead),
     "මුළු කාලසීමාව (වසර ~2.5ක් සඳහා, අද මිලට)",
-    `අනාගත ඇස්තමේන්තුව — වසර ${yearsUntilStart}කින් පසු, වසර ~2.5ක් සඳහා (උද්ධමනය සමග)`,
+    `අනාගත ඇස්තමේන්තුව — ${milestoneLabel(t.aLevel)}, වසර ~2.5ක් සඳහා (උද්ධමනය සමග)`,
   ];
 }
 
@@ -172,6 +169,13 @@ export function buildReportHtml(
   const p = projection;
   const inflationPercent = p.assumptions.generalCostInflationPercent;
   const yearsToHigherEd = p.yearsToHigherEducation;
+  const timeline = buildTimeline({
+    baseYear: p.baseYear,
+    aLevelStartAge: p.aLevelStartAge,
+    universityStartAge: p.universityStartAge,
+    aLevelYearsFromNow: p.alTuition.yearsUntilStart,
+    universityYearsFromNow: yearsToHigherEd,
+  });
   const planLabel =
     HIGHER_EDUCATION_PLANS.find((x) => x.value === profile.higherEducationPlan)?.label ??
     profile.higherEducationPlan;
@@ -204,15 +208,15 @@ export function buildReportHtml(
         ["අංශය", "අනාගත ඇස්තමේන්තුව"],
         [
           [
-            `උසස් පෙළ — වසර ${p.alTuition.yearsUntilStart}කින් පසු, ${yearsLabel(p.grandTotal.aLevelPeriodYears, p.grandTotal.aLevelPeriodYears)} සඳහා`,
+            `උසස් පෙළ — ${milestoneLabel(timeline.aLevel)}, ${yearsLabel(p.grandTotal.aLevelPeriodYears, p.grandTotal.aLevelPeriodYears)} සඳහා`,
             range(p.grandTotal.components.aLevelPeriodProjectedLkrMin, p.grandTotal.components.aLevelPeriodProjectedLkrMax),
           ],
           [
-            `උපාධි වියදම — වසර ${yearsToHigherEd}කින් පසු, ${yearsLabel(p.grandTotal.degreeDurationYearsMin, p.grandTotal.degreeDurationYearsMax)} සඳහා`,
+            `උපාධි වියදම — ${milestoneLabel(timeline.university)}, ${yearsLabel(p.grandTotal.degreeDurationYearsMin, p.grandTotal.degreeDurationYearsMax)} සඳහා`,
             range(p.grandTotal.components.degreeCostProjectedLkrMin, p.grandTotal.components.degreeCostProjectedLkrMax),
           ],
           [
-            `ජීවන වියදම් — වසර ${yearsToHigherEd}කින් පසු, ${yearsLabel(p.grandTotal.degreeDurationYearsMin, p.grandTotal.degreeDurationYearsMax)} සඳහා`,
+            `ජීවන වියදම් — ${milestoneLabel(timeline.university)}, ${yearsLabel(p.grandTotal.degreeDurationYearsMin, p.grandTotal.degreeDurationYearsMax)} සඳහා`,
             range(p.grandTotal.components.livingCostProjectedLkrMin, p.grandTotal.components.livingCostProjectedLkrMax),
           ],
         ],
@@ -225,9 +229,9 @@ export function buildReportHtml(
   if (p.alTuition.applicable) {
     sections.push(
       section(
-        "උසස් පෙළ (A/Level) කාලය තුළ වියදම් — මුළු කාලසීමාව වසර 2.5ක් පමණ",
+        `උසස් පෙළ (A/Level) කාලය තුළ වියදම් — ${milestoneLabel(timeline.aLevel)} සිට, මුළු කාලසීමාව වසර 2.5ක් පමණ`,
         table(
-          alCols(p.alTuition.yearsUntilStart, inflationPercent),
+          alCols(timeline, inflationPercent),
           [
             [
               "උපකාරක පන්ති",
@@ -263,7 +267,7 @@ export function buildReportHtml(
     section(
       `අධ්‍යාපන වියදම් — ${p.education[0].categoryLabel}`,
       table(
-        educationCols(yearsToHigherEd, inflationPercent),
+        educationCols(timeline, inflationPercent),
         p.education.map((e) => {
           const annual: NumRange = { min: e.perYearCostTodayLkrMin, max: e.perYearCostTodayLkrMax };
           return [
@@ -283,9 +287,9 @@ export function buildReportHtml(
     const o = p.overseasDegreeCostBreakdown;
     sections.push(
       section(
-        `විදේශීය විශ්වවිද්‍යාල උපාධි වියදම් විස්තරය — වසර ${o.durationYears}ක් සඳහා`,
+        `විදේශීය විශ්වවිද්‍යාල උපාධි වියදම් විස්තරය — ${milestoneLabel(timeline.university)} සිට, වසර ${o.durationYears}ක් සඳහා`,
         table(
-          cols3(yearsToHigherEd, yearsLabel(o.durationYears, o.durationYears), inflationPercent),
+          cols3(timeline, yearsLabel(o.durationYears, o.durationYears), inflationPercent),
           [
             overseasRow("පාඨමාලා ගාස්තු", o.tuitionLkrMin, o.tuitionLkrMax, o.durationYears, inflationPercent, yearsToHigherEd),
             overseasRow("නවාතැන්", o.accommodationLkrMin, o.accommodationLkrMax, o.durationYears, inflationPercent, yearsToHigherEd),
@@ -315,15 +319,15 @@ export function buildReportHtml(
     const durMax = le.degreeDurationYearsMax;
     sections.push(
       section(
-        `දේශීය පෞද්ගලික විශ්වවිද්‍යාල කාලය තුළ ජීවන වියදම් — ${yearsLabel(durMin, durMax)} සඳහා`,
-        table(cols3(yearsToHigherEd, yearsLabel(durMin, durMax), inflationPercent), [
+        `දේශීය පෞද්ගලික විශ්වවිද්‍යාල කාලය තුළ ජීවන වියදම් — ${milestoneLabel(timeline.university)} සිට, ${yearsLabel(durMin, durMax)} සඳහා`,
+        table(cols3(timeline, yearsLabel(durMin, durMax), inflationPercent), [
           livingCategoryRow("නවාතැන්", c.accommodationLkrMin, c.accommodationLkrMax, durMin, durMax, inflationPercent, yearsToHigherEd),
           livingCategoryRow("ආහාර", c.foodLkrMin, c.foodLkrMax, durMin, durMax, inflationPercent, yearsToHigherEd),
           livingCategoryRow("වෙනත් වියදම්", c.miscLkrMin, c.miscLkrMax, durMin, durMax, inflationPercent, yearsToHigherEd),
         ]) +
           `<p class="scenario-label">සිසුවා සැබවින්ම මසකට ජීවන වියදම සඳහා වියදම් කරනු ඇති මුදල (Monthly living expenses)</p>` +
           table(
-            cols3(yearsToHigherEd, yearsLabel(durMin, durMax), inflationPercent),
+            cols3(timeline, yearsLabel(durMin, durMax), inflationPercent),
             [
               livingCategoryRow("අඩු වියදම් (Saver)", t.saverLkrMin, t.saverLkrMax, durMin, durMax, inflationPercent, yearsToHigherEd),
               livingCategoryRow("සාමාන්‍ය (Moderate)", t.moderateLkrMin, t.moderateLkrMax, durMin, durMax, inflationPercent, yearsToHigherEd),
@@ -358,7 +362,7 @@ export function buildReportHtml(
         return (
           `<p class="scenario-label">${esc(s.label)}</p>` +
           table(
-            cols3(yearsToHigherEd, yearsLabel(durMin, durMax), inflationPercent),
+            cols3(timeline, yearsLabel(durMin, durMax), inflationPercent),
             rows,
             [
               "ඵලදායි එකතුව",
@@ -371,7 +375,7 @@ export function buildReportHtml(
         );
       })
       .join("");
-    sections.push(section(`දේශීය රජයේ විශ්වවිද්‍යාල කාලය තුළ ජීවන වියදම් — ${yearsLabel(durMin, durMax)} සඳහා`, inner));
+    sections.push(section(`දේශීය රජයේ විශ්වවිද්‍යාල කාලය තුළ ජීවන වියදම් — ${milestoneLabel(timeline.university)} සිට, ${yearsLabel(durMin, durMax)} සඳහා`, inner));
   }
 
   if (p.vocationalTrainingLivingExpenses.applicable) {
@@ -379,9 +383,9 @@ export function buildReportHtml(
     const c = v.monthlyCategories;
     sections.push(
       section(
-        `වෘත්තීය/තාක්ෂණික පුහුණු කාලය තුළ ජීවන වියදම් — ${yearsLabel(v.durationYears, v.durationYears)} සඳහා`,
+        `වෘත්තීය/තාක්ෂණික පුහුණු කාලය තුළ ජීවන වියදම් — ${milestoneLabel(timeline.university)} සිට, ${yearsLabel(v.durationYears, v.durationYears)} සඳහා`,
         table(
-          cols3(yearsToHigherEd, yearsLabel(v.durationYears, v.durationYears), inflationPercent),
+          cols3(timeline, yearsLabel(v.durationYears, v.durationYears), inflationPercent),
           [
             livingCategoryRow("ආහාර", c.foodLkrMin, c.foodLkrMax, v.durationYears, v.durationYears, inflationPercent, yearsToHigherEd),
             livingCategoryRow("පාඨමාලා ද්‍රව්‍ය", c.materialsLkrMin, c.materialsLkrMax, v.durationYears, v.durationYears, inflationPercent, yearsToHigherEd),
@@ -409,7 +413,7 @@ export function buildReportHtml(
   if (p.sports.provided && p.sports.monthlyCostLkr != null) {
     sections.push(
       section(
-        `ක්‍රීඩා සම්බන්ධ වියදම් — ඉදිරි වසර ${yearsToHigherEd}ක් සඳහා`,
+        `ක්‍රීඩා සම්බන්ධ වියදම් — දැන් සිට ${milestoneLabel(timeline.university)} දක්වා, ඉදිරි වසර ${yearsToHigherEd}ක් සඳහා`,
         // This cost starts NOW and accrues yearly until higher education —
         // not a lump sum that begins after a wait, hence its own header.
         table(
@@ -417,8 +421,8 @@ export function buildReportHtml(
             "අයිතමය",
             "මාසිකව",
             "වාර්ෂිකව",
-            oneYearHeader(inflationPercent),
-            `අනාගත ඇස්තමේන්තුව — ඉදිරි වසර ${yearsToHigherEd}ක මුළු එකතුව (උද්ධමනය සමග)`,
+            oneYearCostHeader(inflationPercent, timeline.oneYearAhead),
+            `අනාගත ඇස්තමේන්තුව — ${milestoneLabel(timeline.university)} දක්වා ඉදිරි වසර ${yearsToHigherEd}ක මුළු එකතුව (උද්ධමනය සමග)`,
           ],
           [],
           [
@@ -438,7 +442,7 @@ export function buildReportHtml(
     const budgetRows: string[][] = [];
     if (bi.aLevelPeriod.applicable) {
       budgetRows.push([
-        `උසස් පෙළ — වසර ${bi.aLevelPeriod.yearsUntilStart}කින්`,
+        `උසස් පෙළ — ${milestoneLabel(timeline.aLevel)}`,
         lkr(bi.aLevelPeriod.currentMonthlyExpenseLkr),
         lkr(bi.aLevelPeriod.projectedExpenseLkr),
         range(bi.aLevelPeriod.projectedNewCostLkrMin, bi.aLevelPeriod.projectedNewCostLkrMax),
@@ -446,7 +450,7 @@ export function buildReportHtml(
       ]);
     }
     budgetRows.push([
-      `විශ්ව විද්‍යාල කාලය — වසර ${bi.universityPeriod.yearsUntilStart}කින්`,
+      `විශ්ව විද්‍යාල කාලය — ${milestoneLabel(timeline.university)}`,
       lkr(bi.universityPeriod.currentMonthlyExpenseLkr),
       lkr(bi.universityPeriod.projectedExpenseLkr),
       range(bi.universityPeriod.projectedNewCostLkrMin, bi.universityPeriod.projectedNewCostLkrMax),

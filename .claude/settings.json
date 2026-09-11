@@ -28,7 +28,18 @@
       "Bash(npx tsc *)",
       "Bash(pdftotext scripts/tmp-oneyear.pdf -)",
       "Bash(pdftotext -layout scripts/tmp-oneyear.pdf -)",
-      "Bash(cd \"F:\\\\My Projects\\\\AIA-Persona-Analysis\" && rm -f scripts/test-oneyear.ts scripts/test-oneyear-pdf.ts scripts/tmp-*.html scripts/tmp-oneyear.pdf && ls scripts/)"
+      "Bash(cd \"F:\\\\My Projects\\\\AIA-Persona-Analysis\" && rm -f scripts/test-oneyear.ts scripts/test-oneyear-pdf.ts scripts/tmp-*.html scripts/tmp-oneyear.pdf && ls scripts/)",
+      "Bash(echo \"tsc exit: $?\")",
+      "Bash(pdftotext scripts/tmp-yearlabel.pdf -)",
+      "Bash(grep -n \"කාලය තුළ ජීවන වියදම් —\\\\|පුහුණු කාලය තුළ\\\\|උපාධි වියදම් විස්තරය —\\\\|ඉදිරි වසර\\\\|වසර \\\\${p.monthlyBudgetImpact\\\\|වසර \\\\${yearsToHigherEd}කින්\" app/child-report/PricingTables.tsx)",
+      "Bash(echo \"exit=$?\")",
+      "Bash(grep -n \"කින් පසු\\\\|කින්\\\\`\\\\|ඉදිරි වසර\" app/child-report/PricingTables.tsx)",
+      "Bash(sed -i -e 's/cols3\\(yearsToHigherEd, /cols3\\(timeline, /g' -e 's/educationCols\\(yearsToHigherEd, inflationPercent\\)/educationCols\\(timeline, inflationPercent\\)/' -e 's/alCols\\(p.alTuition.yearsUntilStart, inflationPercent\\)/alCols\\(timeline, inflationPercent\\)/' -e 's/^  yearsLabel,$/  yearsLabel,\\\\n  buildTimeline,\\\\n  milestoneLabel,\\\\n  type ReportTimeline,/' lib/pdf/report-html-template.ts)",
+      "Bash(grep -n \"කින් පසු\\\\|කින්\\\\`\\\\|ඉදිරි වසර\\\\|yearsUntilStart}කින්\" lib/pdf/report-html-template.ts)",
+      "Bash(sed -i -e 's/`උසස් පෙළ — වසර ${bi.aLevelPeriod.yearsUntilStart}කින්`/`උසස් පෙළ — ${milestoneLabel\\(timeline.aLevel\\)}`/' -e 's/`විශ්ව විද්‍යාල කාලය — වසර ${bi.universityPeriod.yearsUntilStart}කින්`/`විශ්ව විද්‍යාල කාලය — ${milestoneLabel\\(timeline.university\\)}`/' lib/pdf/report-html-template.ts)",
+      "Bash(grep -n \"විස්තරය — වසර\\\\|ජීවන වියදම් — \\\\${yearsLabel\\\\|පුහුණු කාලය තුළ ජීවන වියදම් — \\\\${yearsLabel\\\\|A/Level\\) කාලය තුළ වියදම්\" lib/pdf/report-html-template.ts)",
+      "Bash(sed -i -e 's|\"උසස් පෙළ \\(A/Level\\) කාලය තුළ වියදම් — මුළු කාලසීමාව වසර 2.5ක් පමණ\",|`උසස් පෙළ \\(A/Level\\) කාලය තුළ වියදම් — ${milestoneLabel\\(timeline.aLevel\\)} සිට, මුළු කාලසීමාව වසර 2.5ක් පමණ`,|' -e 's|`විදේශීය විශ්වවිද්‍යාල උපාධි වියදම් විස්තරය — වසර ${o.durationYears}ක් සඳහා`|`විදේශීය විශ්වවිද්‍යාල උපාධි වියදම් විස්තරය — ${milestoneLabel\\(timeline.university\\)} සිට, වසර ${o.durationYears}ක් සඳහා`|' -e 's|`දේශීය පෞද්ගලික විශ්වවිද්‍යාල කාලය තුළ ජීවන වියදම් — ${yearsLabel\\(durMin, durMax\\)} සඳහා`|`දේශීය පෞද්ගලික විශ්වවිද්‍යාල කාලය තුළ ජීවන වියදම් — ${milestoneLabel\\(timeline.university\\)} සිට, ${yearsLabel\\(durMin, durMax\\)} සඳහා`|' -e 's|`දේශීය රජයේ විශ්වවිද්‍යාල කාලය තුළ ජීවන වියදම් — ${yearsLabel\\(durMin, durMax\\)} සඳහා`|`දේශීය රජයේ විශ්වවිද්‍යාල කාලය තුළ ජීවන වියදම් — ${milestoneLabel\\(timeline.university\\)} සිට, ${yearsLabel\\(durMin, durMax\\)} සඳහා`|' -e 's|`වෘත්තීය/තාක්ෂණික පුහුණු කාලය තුළ ජීවන වියදම් — ${yearsLabel\\(v.durationYears, v.durationYears\\)} සඳහා`|`වෘත්තීය/තාක්ෂණික පුහුණු කාලය තුළ ජීවන වියදම් — ${milestoneLabel\\(timeline.university\\)} සිට, ${yearsLabel\\(v.durationYears, v.durationYears\\)} සඳහා`|' lib/pdf/report-html-template.ts)",
+      "Bash(pdftotext scripts/tmp-ms.pdf -)"
     ],
     "additionalDirectories": [
       "F:\\My Projects\\AIA-Persona-Analysis\\scripts"
