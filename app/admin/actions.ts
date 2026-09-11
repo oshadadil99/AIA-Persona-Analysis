@@ -35,3 +35,25 @@ export async function deleteChildProfile(id: string): Promise<DeleteResult> {
   revalidatePath("/admin");
   return { ok: true };
 }
+
+export async function deleteChildProfiles(ids: string[]): Promise<DeleteResult> {
+  if (ids.length === 0) {
+    return { ok: false, error: "No records selected." };
+  }
+
+  try {
+    await requireOperatorSession();
+  } catch {
+    return { ok: false, error: "Not authenticated." };
+  }
+
+  const supabase = createServiceClient();
+  const { error } = await supabase.from("child_profiles").delete().in("id", ids);
+
+  if (error) {
+    return { ok: false, error: error.message };
+  }
+
+  revalidatePath("/admin");
+  return { ok: true };
+}

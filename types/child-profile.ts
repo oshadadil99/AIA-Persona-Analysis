@@ -90,6 +90,7 @@ export interface ChildProfileInput {
   customerName: string | null;
   customerContactNumber: string | null;
   customerAge: number | null;
+  customerOccupation: string | null;
   dependentsCount: number;
   desiredLifeCoverLkr: number | null;
   monthlyBudgetLkr: number | null;
@@ -103,6 +104,10 @@ export interface ChildProfileInput {
   // education costs) — used to show the combined monthly budget burden at
   // each stage (A/Level, university), not as an income/affordability check.
   householdMonthlyExpenseLkr: number;
+  // How much the household currently manages to save per month — optional,
+  // separate from householdMonthlyExpenseLkr (spending) and monthlyBudgetLkr
+  // (budget available specifically for a premium).
+  householdMonthlySavingsLkr: number | null;
   criticalIllnesses: CriticalIllnessFlag[];
   higherEducationPlan: HigherEducationPlan;
   localPrivateDegreeField: LocalPrivateDegreeField | null;
