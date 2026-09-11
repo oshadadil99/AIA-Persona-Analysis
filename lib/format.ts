@@ -50,6 +50,14 @@ export function rangeStr(r: NumRange): string {
   return range(r.min, r.max);
 }
 
+// Sinhala duration label for a period that may be a fixed number of years or
+// a min-max range ("වසර 4ක්" / "වසර 3–4ක්"). Every projected-cost column
+// states both WHEN the cost starts and HOW LONG it runs for, so a figure is
+// never shown without the period it covers.
+export function yearsLabel(min: number, max: number): string {
+  return min === max ? `වසර ${min}ක්` : `වසර ${min}–${max}ක්`;
+}
+
 // Inflates a today's-terms range forward by `years` at `inflationPercent`/year
 // — same formula used everywhere else in the pipeline (assumptions.ts's
 // futureValueOfCostToday), duplicated here so display-layer code can apply it
