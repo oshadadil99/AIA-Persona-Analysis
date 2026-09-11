@@ -24,7 +24,11 @@
       "Bash(pdftotext scripts/tmp-layout.pdf -)",
       "Bash(pdftotext -layout scripts/tmp-layout.pdf -)",
       "Bash(pdftotext -f 1 -l 1 -layout scripts/tmp-layout.pdf -)",
-      "Bash(grep -v \"^\\\\s*$\")"
+      "Bash(grep -v \"^\\\\s*$\")",
+      "Bash(npx tsc *)",
+      "Bash(pdftotext scripts/tmp-oneyear.pdf -)",
+      "Bash(pdftotext -layout scripts/tmp-oneyear.pdf -)",
+      "Bash(cd \"F:\\\\My Projects\\\\AIA-Persona-Analysis\" && rm -f scripts/test-oneyear.ts scripts/test-oneyear-pdf.ts scripts/tmp-*.html scripts/tmp-oneyear.pdf && ls scripts/)"
     ],
     "additionalDirectories": [
       "F:\\My Projects\\AIA-Persona-Analysis\\scripts"

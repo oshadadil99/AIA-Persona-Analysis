@@ -19,23 +19,32 @@ import {
 // left implicit) — per operator instruction, every pricing table must state
 // the time period its projection is based on, not just "inflation-adjusted"
 // with no indication of how far into the future that is.
-function cols3(yearsUntilStart: number, durationLabel: string): string[] {
+function cols3(yearsUntilStart: number, durationLabel: string, inflationPercent: number): string[] {
   return [
     "අයිතමය (Item)",
     "මාසිකව (Monthly)",
     "වාර්ෂිකව (Annual)",
+    oneYearHeader(inflationPercent),
     `අනාගත ඇස්තමේන්තුව — වසර ${yearsUntilStart}කින් පසු, ${durationLabel} සඳහා (Inflation-Adjusted)`,
   ];
+}
+
+// Near-term reference point: what ONE year of this item costs a year from
+// now. Deliberately separate from the far-future projection — a figure the
+// family can sanity-check against next year's actual spending.
+function oneYearHeader(inflationPercent: number): string {
+  return `වසර 1ක වියදම — වසර 1ක උද්ධමනය සමග (1-Year, +${inflationPercent}%)`;
 }
 
 // University/degree fees are billed per-semester, not monthly — so the
 // education cost table uses its own columns (semester fee, annual, duration,
 // inflation-adjusted total) instead of the generic monthly-based cols3().
-function educationCols(yearsUntilStart: number): string[] {
+function educationCols(yearsUntilStart: number, inflationPercent: number): string[] {
   return [
     "අධ්‍යාපන ප්‍රවර්ගය (Category)",
     "සෙමෙස්ටර් ගාස්තුව (Per Semester)",
     "වාර්ෂිකව (Annual)",
+    oneYearHeader(inflationPercent),
     "කාලසීමාව (Duration)",
     `අනාගත ඇස්තමේන්තුව — වසර ${yearsUntilStart}කින් පසු, මුළු පාඨමාලාව සඳහා (Total, Inflation-Adjusted)`,
   ];
@@ -46,11 +55,12 @@ function educationCols(yearsUntilStart: number): string[] {
 // the annual figure just inflated. Both scope changes (1yr -> ~2.5yr,
 // today's terms -> inflation-adjusted) need to be visible, or the total
 // looks like an unexplained multiplier on the annual figure.
-function alCols(yearsUntilStart: number): string[] {
+function alCols(yearsUntilStart: number, inflationPercent: number): string[] {
   return [
     "අයිතමය (Item)",
     "මාසිකව (Monthly)",
     "වාර්ෂිකව (Annual, 1 වසර)",
+    oneYearHeader(inflationPercent),
     "මුළු කාලසීමාව (වසර ~2.5ක් සඳහා, අද මිලට)",
     `අනාගත ඇස්තමේන්තුව — වසර ${yearsUntilStart}කින් පසු, වසර ~2.5ක් සඳහා (උද්ධමනය සමග)`,
   ];
@@ -101,12 +111,13 @@ export default function PricingTables({ projection }: { projection: ChildFutureP
       {p.alTuition.applicable && (
         <TableSection title="උසස් පෙළ (A/Level) කාලය තුළ වියදම් — මුළු කාලසීමාව වසර 2.5ක් පමණ">
           <Table
-            headers={alCols(p.alTuition.yearsUntilStart)}
+            headers={alCols(p.alTuition.yearsUntilStart, inflationPercent)}
             rows={[
               [
                 "උපකාරක පන්ති (Tuition classes)",
                 rangeStr(tuitionMonthly),
                 rangeStr(tuitionAnnual),
+                rangeStr(inflateRange(tuitionAnnual, inflationPercent, 1)),
                 range(p.alTuition.totalCostTodayLkrMin, p.alTuition.totalCostTodayLkrMax),
                 range(p.alTuition.projectedCostLkrMin, p.alTuition.projectedCostLkrMax),
               ],
@@ -114,6 +125,7 @@ export default function PricingTables({ projection }: { projection: ChildFutureP
                 "ඉගෙනුම් ද්‍රව්‍ය (Learning materials)",
                 rangeStr(materialsMonthly),
                 rangeStr(materialsAnnual),
+                rangeStr(inflateRange(materialsAnnual, inflationPercent, 1)),
                 range(p.alMaterials.totalCostTodayLkrMin, p.alMaterials.totalCostTodayLkrMax),
                 range(p.alMaterials.projectedCostLkrMin, p.alMaterials.projectedCostLkrMax),
               ],
@@ -122,6 +134,7 @@ export default function PricingTables({ projection }: { projection: ChildFutureP
               "එකතුව (Total)",
               rangeStr(alTotalMonthly),
               rangeStr(alTotalAnnual),
+              rangeStr(inflateRange(alTotalAnnual, inflationPercent, 1)),
               range(p.alCombinedTotal.totalCostTodayLkrMin, p.alCombinedTotal.totalCostTodayLkrMax),
               range(p.alCombinedTotal.projectedCostLkrMin, p.alCombinedTotal.projectedCostLkrMax),
             ]}
@@ -131,13 +144,14 @@ export default function PricingTables({ projection }: { projection: ChildFutureP
 
       <TableSection title={`අධ්‍යාපන වියදම් (Education Cost) — ${p.education[0].categoryLabel}`}>
         <Table
-          headers={educationCols(yearsToHigherEd)}
+          headers={educationCols(yearsToHigherEd, inflationPercent)}
           rows={p.education.map((e) => {
             const annual: NumRange = { min: e.perYearCostTodayLkrMin, max: e.perYearCostTodayLkrMax };
             return [
               `${e.categoryLabel}${e.fieldOfStudyLabel ? ` — ${e.fieldOfStudyLabel}` : ""}`,
               e.perSemesterLkrMin != null && e.perSemesterLkrMax != null ? range(e.perSemesterLkrMin, e.perSemesterLkrMax) : "—",
               rangeStr(annual),
+              rangeStr(inflateRange(annual, inflationPercent, 1)),
               `${e.durationYearsMin === e.durationYearsMax ? e.durationYearsMin : `${e.durationYearsMin}–${e.durationYearsMax}`} වසර`,
               range(e.projectedCostAtAge19LkrMin, e.projectedCostAtAge19LkrMax),
             ];
@@ -148,7 +162,7 @@ export default function PricingTables({ projection }: { projection: ChildFutureP
       {p.overseasDegreeCostBreakdown.applicable && (
         <TableSection title={`විදේශීය විශ්වවිද්‍යාල උපාධි වියදම් විස්තරය — වසර ${p.overseasDegreeCostBreakdown.durationYears}ක් සඳහා (Foreign University Degree Breakdown)`}>
           <Table
-            headers={cols3(yearsToHigherEd, yearsLabel(p.overseasDegreeCostBreakdown.durationYears, p.overseasDegreeCostBreakdown.durationYears))}
+            headers={cols3(yearsToHigherEd, yearsLabel(p.overseasDegreeCostBreakdown.durationYears, p.overseasDegreeCostBreakdown.durationYears), inflationPercent)}
             rows={[
               overseasRow("පාඨමාලා ගාස්තු (Tuition)", p.overseasDegreeCostBreakdown.tuitionLkrMin, p.overseasDegreeCostBreakdown.tuitionLkrMax, p.overseasDegreeCostBreakdown.durationYears, inflationPercent, yearsToHigherEd),
               overseasRow("නවාතැන් (Accommodation)", p.overseasDegreeCostBreakdown.accommodationLkrMin, p.overseasDegreeCostBreakdown.accommodationLkrMax, p.overseasDegreeCostBreakdown.durationYears, inflationPercent, yearsToHigherEd),
@@ -160,6 +174,13 @@ export default function PricingTables({ projection }: { projection: ChildFutureP
               "එකතුව (Total)",
               rangeStr(divideRange({ min: p.overseasDegreeCostBreakdown.grandTotalTodayLkrMin, max: p.overseasDegreeCostBreakdown.grandTotalTodayLkrMax }, p.overseasDegreeCostBreakdown.durationYears * 12)),
               rangeStr(divideRange({ min: p.overseasDegreeCostBreakdown.grandTotalTodayLkrMin, max: p.overseasDegreeCostBreakdown.grandTotalTodayLkrMax }, p.overseasDegreeCostBreakdown.durationYears)),
+              rangeStr(
+                inflateRange(
+                  divideRange({ min: p.overseasDegreeCostBreakdown.grandTotalTodayLkrMin, max: p.overseasDegreeCostBreakdown.grandTotalTodayLkrMax }, p.overseasDegreeCostBreakdown.durationYears),
+                  inflationPercent,
+                  1,
+                ),
+              ),
               range(p.overseasDegreeCostBreakdown.projectedGrandTotalLkrMin, p.overseasDegreeCostBreakdown.projectedGrandTotalLkrMax),
             ]}
           />
@@ -171,7 +192,7 @@ export default function PricingTables({ projection }: { projection: ChildFutureP
           title={`දේශීය පෞද්ගලික විශ්වවිද්‍යාල කාලය තුළ ජීවන වියදම් — ${yearsLabel(p.localPrivateLivingExpenses.degreeDurationYearsMin, p.localPrivateLivingExpenses.degreeDurationYearsMax)} සඳහා (Local Private University Living Expenses)`}
         >
           <Table
-            headers={cols3(yearsToHigherEd, yearsLabel(p.localPrivateLivingExpenses.degreeDurationYearsMin, p.localPrivateLivingExpenses.degreeDurationYearsMax))}
+            headers={cols3(yearsToHigherEd, yearsLabel(p.localPrivateLivingExpenses.degreeDurationYearsMin, p.localPrivateLivingExpenses.degreeDurationYearsMax), inflationPercent)}
             rows={[
               livingCategoryRow("නවාතැන් (Accommodation)", p.localPrivateLivingExpenses.monthlyCategories.accommodationLkrMin, p.localPrivateLivingExpenses.monthlyCategories.accommodationLkrMax, p.localPrivateLivingExpenses.degreeDurationYearsMin, p.localPrivateLivingExpenses.degreeDurationYearsMax, inflationPercent, yearsToHigherEd),
               livingCategoryRow("ආහාර (Food & meals)", p.localPrivateLivingExpenses.monthlyCategories.foodLkrMin, p.localPrivateLivingExpenses.monthlyCategories.foodLkrMax, p.localPrivateLivingExpenses.degreeDurationYearsMin, p.localPrivateLivingExpenses.degreeDurationYearsMax, inflationPercent, yearsToHigherEd),
@@ -182,13 +203,14 @@ export default function PricingTables({ projection }: { projection: ChildFutureP
             සිසුවා සැබවින්ම මසකට ජීවන වියදම සඳහා වියදම් කරනු ඇති මුදල (Monthly living expenses)
           </p>
           <Table
-            headers={cols3(yearsToHigherEd, yearsLabel(p.localPrivateLivingExpenses.degreeDurationYearsMin, p.localPrivateLivingExpenses.degreeDurationYearsMax))}
+            headers={cols3(yearsToHigherEd, yearsLabel(p.localPrivateLivingExpenses.degreeDurationYearsMin, p.localPrivateLivingExpenses.degreeDurationYearsMax), inflationPercent)}
             rows={[
               livingCategoryRow("අඩු වියදම් (Saver tier)", p.localPrivateLivingExpenses.budgetTiers.saverLkrMin, p.localPrivateLivingExpenses.budgetTiers.saverLkrMax, p.localPrivateLivingExpenses.degreeDurationYearsMin, p.localPrivateLivingExpenses.degreeDurationYearsMax, inflationPercent, yearsToHigherEd),
               livingCategoryRow("සාමාන්‍ය (Moderate tier)", p.localPrivateLivingExpenses.budgetTiers.moderateLkrMin, p.localPrivateLivingExpenses.budgetTiers.moderateLkrMax, p.localPrivateLivingExpenses.degreeDurationYearsMin, p.localPrivateLivingExpenses.degreeDurationYearsMax, inflationPercent, yearsToHigherEd),
             ]}
             totalRow={[
               `ඇස්තමේන්තුගත එකතුව (${p.localPrivateLivingExpenses.degreeDurationYearsMin}-${p.localPrivateLivingExpenses.degreeDurationYearsMax}y)`,
+              "—",
               "—",
               "—",
               range(p.localPrivateLivingExpenses.projectedTotalLivingCostLkrMin, p.localPrivateLivingExpenses.projectedTotalLivingCostLkrMax),
@@ -209,7 +231,7 @@ export default function PricingTables({ projection }: { projection: ChildFutureP
               <div key={s.label} className="mb-4 last:mb-0">
                 <p className="mb-1.5 text-sm font-medium text-neutral-700 dark:text-neutral-300">{s.label}</p>
                 <Table
-                  headers={cols3(yearsToHigherEd, yearsLabel(durMin, durMax))}
+                  headers={cols3(yearsToHigherEd, yearsLabel(durMin, durMax), inflationPercent)}
                   rows={[
                     livingCategoryRow("නවාතැන් (Accommodation)", s.accommodationLkrMin, s.accommodationLkrMax, durMin, durMax, inflationPercent, yearsToHigherEd),
                     livingCategoryRow("ආහාර (Food)", s.foodLkrMin, s.foodLkrMax, durMin, durMax, inflationPercent, yearsToHigherEd),
@@ -220,11 +242,18 @@ export default function PricingTables({ projection }: { projection: ChildFutureP
                           "මහපොළ ශිෂ්‍යත්වය (Mahapola, -)",
                           `-${lkr(s.mahapolaMonthlyLkr)}`,
                           `-${lkr(s.mahapolaMonthlyLkr * (s.mahapolaMonthsPerYear ?? 12))}`,
+                          `-${lkr(s.mahapolaMonthlyLkr * (s.mahapolaMonthsPerYear ?? 12) * (1 + inflationPercent / 100))}`,
                           `${s.mahapolaMonthsPerYear}/12 මාස පමණක්`,
                         ]] as string[][])
                       : []),
                   ]}
-                  totalRow={["ඵලදායි එකතුව (Effective total)", rangeStr(effectiveMonthly), rangeStr(multiplyRange(effectiveMonthly, 12)), range(s.projectedTotalCostLkrMin, s.projectedTotalCostLkrMax)]}
+                  totalRow={[
+                    "ඵලදායි එකතුව (Effective total)",
+                    rangeStr(effectiveMonthly),
+                    rangeStr(multiplyRange(effectiveMonthly, 12)),
+                    rangeStr(inflateRange(multiplyRange(effectiveMonthly, 12), inflationPercent, 1)),
+                    range(s.projectedTotalCostLkrMin, s.projectedTotalCostLkrMax),
+                  ]}
                 />
               </div>
             );
@@ -237,7 +266,7 @@ export default function PricingTables({ projection }: { projection: ChildFutureP
           title={`වෘත්තීය/තාක්ෂණික පුහුණු කාලය තුළ ජීවන වියදම් — ${yearsLabel(p.vocationalTrainingLivingExpenses.durationYears, p.vocationalTrainingLivingExpenses.durationYears)} සඳහා (Vocational / Technical Training Living Expenses)`}
         >
           <Table
-            headers={cols3(yearsToHigherEd, yearsLabel(p.vocationalTrainingLivingExpenses.durationYears, p.vocationalTrainingLivingExpenses.durationYears))}
+            headers={cols3(yearsToHigherEd, yearsLabel(p.vocationalTrainingLivingExpenses.durationYears, p.vocationalTrainingLivingExpenses.durationYears), inflationPercent)}
             rows={[
               livingCategoryRow("ආහාර (Food)", p.vocationalTrainingLivingExpenses.monthlyCategories.foodLkrMin, p.vocationalTrainingLivingExpenses.monthlyCategories.foodLkrMax, p.vocationalTrainingLivingExpenses.durationYears, p.vocationalTrainingLivingExpenses.durationYears, inflationPercent, yearsToHigherEd),
               livingCategoryRow("පාඨමාලා ද්‍රව්‍ය (Materials)", p.vocationalTrainingLivingExpenses.monthlyCategories.materialsLkrMin, p.vocationalTrainingLivingExpenses.monthlyCategories.materialsLkrMax, p.vocationalTrainingLivingExpenses.durationYears, p.vocationalTrainingLivingExpenses.durationYears, inflationPercent, yearsToHigherEd),
@@ -248,6 +277,13 @@ export default function PricingTables({ projection }: { projection: ChildFutureP
               `ඇස්තමේන්තුගත එකතුව (${p.vocationalTrainingLivingExpenses.durationYears}y)`,
               range(p.vocationalTrainingLivingExpenses.averageMonthlyLkrMin, p.vocationalTrainingLivingExpenses.averageMonthlyLkrMax),
               range(p.vocationalTrainingLivingExpenses.averageMonthlyLkrMin * 12, p.vocationalTrainingLivingExpenses.averageMonthlyLkrMax * 12),
+              rangeStr(
+                inflateRange(
+                  { min: p.vocationalTrainingLivingExpenses.averageMonthlyLkrMin * 12, max: p.vocationalTrainingLivingExpenses.averageMonthlyLkrMax * 12 },
+                  inflationPercent,
+                  1,
+                ),
+              ),
               range(p.vocationalTrainingLivingExpenses.projectedTotalCostLkrMin, p.vocationalTrainingLivingExpenses.projectedTotalCostLkrMax),
             ]}
           />
@@ -270,6 +306,7 @@ export default function PricingTables({ projection }: { projection: ChildFutureP
               "අයිතමය (Item)",
               "මාසිකව (Monthly)",
               "වාර්ෂිකව (Annual)",
+              oneYearHeader(inflationPercent),
               `අනාගත ඇස්තමේන්තුව — ඉදිරි වසර ${yearsToHigherEd}ක මුළු එකතුව (උද්ධමනය සමග)`,
             ]}
             rows={[]}
@@ -277,6 +314,7 @@ export default function PricingTables({ projection }: { projection: ChildFutureP
               "අනාගත ඇස්තමේන්තුව (Projected)",
               lkr(p.sports.monthlyCostLkr),
               lkr(p.sports.monthlyCostLkr * 12),
+              lkr(p.sports.monthlyCostLkr * 12 * (1 + inflationPercent / 100)),
               lkr(p.sports.totalProjectedCostLkr),
             ]}
           />
@@ -335,8 +373,9 @@ function overseasRow(
   const total: NumRange = { min, max };
   const annual = divideRange(total, durationYears);
   const monthly = divideRange(annual, 12);
+  const oneYear = inflateRange(annual, inflationPercent, 1);
   const inflatedTotal = inflateRange(total, inflationPercent, yearsUntilStart);
-  return [label, rangeStr(monthly), rangeStr(annual), rangeStr(inflatedTotal)];
+  return [label, rangeStr(monthly), rangeStr(annual), rangeStr(oneYear), rangeStr(inflatedTotal)];
 }
 
 function livingCategoryRow(
@@ -350,9 +389,10 @@ function livingCategoryRow(
 ): string[] {
   const monthly: NumRange = { min: monthlyMin, max: monthlyMax };
   const annual = multiplyRange(monthly, 12);
+  const oneYear = inflateRange(annual, inflationPercent, 1);
   const total = totalOverDurationRange(monthly, durationMin, durationMax);
   const inflatedTotal = inflateRange(total, inflationPercent, yearsUntilStart);
-  return [label, rangeStr(monthly), rangeStr(annual), rangeStr(inflatedTotal)];
+  return [label, rangeStr(monthly), rangeStr(annual), rangeStr(oneYear), rangeStr(inflatedTotal)];
 }
 
 function TableSection({
