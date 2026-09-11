@@ -6,7 +6,13 @@ import educationPlan from "@/data/education.json";
 // downstream (including any LLM explanation/report step) can present them
 // as fact.
 export const COST_ASSUMPTIONS = {
-  generalCostInflationPercent: 8,
+  // Confirmed 2026-09-11 — CBSL's official medium-term inflation target under
+  // its Flexible Inflation Targeting framework (band: 5% +/- 1.5pp). NOT a
+  // simple average of recent actual inflation, which has been extremely
+  // volatile (-4.76% in 2025 to 49.72% at the 2022 crisis peak) and would
+  // badly distort a 12-18 year compounding projection either direction —
+  // this target is the most defensible sourced figure for that horizon.
+  generalCostInflationPercent: 5,
   localDegreeCostTodayLkr: 2_500_000,
   savingsGrowthScenariosPercent: [4, 8, 10], // mirrors the plan's own sample illustration scenarios
   // Sourced from data/education.json's Critical Illness Cover rider — a real
