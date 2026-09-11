@@ -330,6 +330,23 @@ export function projectChildFuture(profile: ChildProfileInput): ChildFutureProje
             perSemesterLkrMax: null,
           };
 
+  const overseasDegreeScenario = {
+    scenario: "overseas_degree" as const,
+    categoryLabel: "විදේශීය විශ්වවිද්‍යාලය (Foreign University)",
+    fieldOfStudyLabel: null,
+    source: OVERSEAS_DEGREE_COST_SOURCE,
+    costTodayLkrMin: OVERSEAS_DEGREE_COST_BREAKDOWN.grandTotalLkrMin,
+    costTodayLkrMax: OVERSEAS_DEGREE_COST_BREAKDOWN.grandTotalLkrMax,
+    durationYearsMin: OVERSEAS_DEGREE_COST_BREAKDOWN.durationYears,
+    durationYearsMax: OVERSEAS_DEGREE_COST_BREAKDOWN.durationYears,
+    // Overseas is billed annually, not per-semester.
+    perSemesterLkrMin: null,
+    perSemesterLkrMax: null,
+  };
+
+  // ONLY the plan the customer actually chose. Showing the alternative
+  // scenario alongside it (as this used to) puts a cost the family will never
+  // pay next to the one they will, which reads as part of their bill.
   const scenarios: {
     scenario: "local_degree" | "overseas_degree";
     categoryLabel: string;
@@ -341,22 +358,7 @@ export function projectChildFuture(profile: ChildProfileInput): ChildFutureProje
     durationYearsMax: number;
     perSemesterLkrMin: number | null;
     perSemesterLkrMax: number | null;
-  }[] = [
-    localDegreeScenario,
-    {
-      scenario: "overseas_degree",
-      categoryLabel: "විදේශීය විශ්වවිද්‍යාලය (Foreign University)",
-      fieldOfStudyLabel: null,
-      source: OVERSEAS_DEGREE_COST_SOURCE,
-      costTodayLkrMin: OVERSEAS_DEGREE_COST_BREAKDOWN.grandTotalLkrMin,
-      costTodayLkrMax: OVERSEAS_DEGREE_COST_BREAKDOWN.grandTotalLkrMax,
-      durationYearsMin: OVERSEAS_DEGREE_COST_BREAKDOWN.durationYears,
-      durationYearsMax: OVERSEAS_DEGREE_COST_BREAKDOWN.durationYears,
-      // Overseas is billed annually, not per-semester.
-      perSemesterLkrMin: null,
-      perSemesterLkrMax: null,
-    },
-  ];
+  }[] = [profile.higherEducationPlan === "overseas_degree" ? overseasDegreeScenario : localDegreeScenario];
 
   const education = scenarios.map(
     ({
@@ -640,9 +642,8 @@ export function projectChildFuture(profile: ChildProfileInput): ChildFutureProje
   // left for the LLM to add up itself — three separately-inflated figures
   // (each anchored to a different future point) summed is exactly the kind
   // of arithmetic an LLM can get subtly wrong, so it must never do this math.
-  const chosenEducationScenario =
-    education.find((e) => e.scenario === (profile.higherEducationPlan === "overseas_degree" ? "overseas_degree" : "local_degree")) ??
-    education[0];
+  // `education` holds exactly the chosen plan's scenario (see above).
+  const chosenEducationScenario = education[0];
 
   const livingCostProjectedLkrMin = localPrivateLivingExpenses.applicable
     ? localPrivateLivingExpenses.projectedTotalLivingCostLkrMin

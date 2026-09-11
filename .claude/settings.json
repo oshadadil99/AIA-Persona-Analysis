@@ -18,7 +18,13 @@
       "Bash(grep -o \"සමස්ත සාරාංශය.\\\\{0,700\\\\}\" scripts/tmp-local_private.html)",
       "Bash(pdftotext scripts/tmp-final.pdf -)",
       "Bash(pdftotext -layout scripts/tmp-final.pdf -)",
-      "Bash(cd \"F:\\\\My Projects\\\\AIA-Persona-Analysis\" && rm -f scripts/test-changes-verify.ts scripts/test-final-pdf.ts scripts/tmp-*.html scripts/tmp-final.pdf && git status --short)"
+      "Bash(cd \"F:\\\\My Projects\\\\AIA-Persona-Analysis\" && rm -f scripts/test-changes-verify.ts scripts/test-final-pdf.ts scripts/tmp-*.html scripts/tmp-final.pdf && git status --short)",
+      "Bash(pdftotext scripts/tmp-overseas.pdf -)",
+      "Bash(cd \"F:\\\\My Projects\\\\AIA-Persona-Analysis\" && rm -f scripts/test-single-degree.ts scripts/test-overseas-pdf.ts scripts/tmp-*.html scripts/tmp-overseas.pdf && ls scripts/)",
+      "Bash(pdftotext scripts/tmp-layout.pdf -)",
+      "Bash(pdftotext -layout scripts/tmp-layout.pdf -)",
+      "Bash(pdftotext -f 1 -l 1 -layout scripts/tmp-layout.pdf -)",
+      "Bash(grep -v \"^\\\\s*$\")"
     ],
     "additionalDirectories": [
       "F:\\My Projects\\AIA-Persona-Analysis\\scripts"

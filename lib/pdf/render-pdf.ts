@@ -31,17 +31,16 @@ async function launchBrowser(): Promise<Browser> {
 // this API instead. Chromium renders header/footer templates in a very
 // limited CSS environment (no external stylesheets, no @font-face), so this
 // stays plain inline-styled HTML in a Latin font.
-const CONTACT_HEADER_TEMPLATE = `
-  <div style="width:100%; font-family:Arial,Helvetica,sans-serif; padding:5px 10mm 2px;
-    box-sizing:border-box; -webkit-print-color-adjust:exact;">
-    <div style="display:flex; align-items:center; justify-content:center; gap:9px;
-      width:fit-content; margin:0 auto; background-color:#ecfdf5; border:1px solid #a7f3d0;
-      border-radius:999px; padding:4px 16px;">
-      <span style="font-size:9px; font-weight:700; color:#047857;">Oshada Dilshan</span>
-      <span style="font-size:7px; color:#6ee7b7;">&#9679;</span>
-      <span style="font-size:8.5px; color:#065f46;">0703633032</span>
-      <span style="font-size:7px; color:#6ee7b7;">&#9679;</span>
-      <span style="font-size:8.5px; color:#065f46;">oshadasayakkara@gmail.com</span>
+const CONTACT_FOOTER_TEMPLATE = `
+  <div style="width:100%; font-family:Arial,Helvetica,sans-serif; padding:0 10mm 4px;
+    box-sizing:border-box; display:flex; justify-content:flex-end;
+    -webkit-print-color-adjust:exact;">
+    <div style="text-align:right; line-height:1.4;">
+      <div style="font-size:6.5px; color:#6b7280; letter-spacing:0.3px;">For further details, contact</div>
+      <div style="font-size:8px; color:#111827;">
+        <span style="font-weight:700; color:#047857;">Oshada Dilshan</span>
+        <span style="color:#9ca3af;">&nbsp;|&nbsp;</span>0703633032<span style="color:#9ca3af;">&nbsp;|&nbsp;</span>oshadasayakkara@gmail.com
+      </div>
     </div>
   </div>
 `;
@@ -55,12 +54,13 @@ export async function renderHtmlToPdf(html: string): Promise<Buffer> {
     const pdf = await page.pdf({
       format: "A4",
       printBackground: true,
-      // Top margin enlarged to fit the contact header bar without it
-      // overlapping the report content.
-      margin: { top: "16mm", bottom: "8mm", left: "10mm", right: "10mm" },
+      // Bottom margin enlarged to fit the contact footer without it
+      // overlapping the report content; top margin back to normal now that
+      // nothing is rendered up there.
+      margin: { top: "10mm", bottom: "15mm", left: "10mm", right: "10mm" },
       displayHeaderFooter: true,
-      headerTemplate: CONTACT_HEADER_TEMPLATE,
-      footerTemplate: "<span></span>",
+      headerTemplate: "<span></span>",
+      footerTemplate: CONTACT_FOOTER_TEMPLATE,
     });
     return Buffer.from(pdf);
   } finally {

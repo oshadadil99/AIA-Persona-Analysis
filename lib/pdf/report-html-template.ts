@@ -179,6 +179,37 @@ export function buildReportHtml(
 
   const sections: string[] = [];
 
+  // Headline summary goes FIRST — the reader should see the total they're
+  // planning for before the per-category breakdowns that build up to it.
+  sections.push(
+    section(
+      "සමස්ත සාරාංශය",
+      // Each row is inflation-adjusted to a DIFFERENT point in time (A/Level
+      // starts earlier than university), so the time period is stated per
+      // row rather than once in the header — a single header year would be
+      // wrong for at least one row.
+      table(
+        ["අංශය", "අනාගත ඇස්තමේන්තුව"],
+        [
+          [
+            `උසස් පෙළ — වසර ${p.alTuition.yearsUntilStart}කින් පසු, ${yearsLabel(p.grandTotal.aLevelPeriodYears, p.grandTotal.aLevelPeriodYears)} සඳහා`,
+            range(p.grandTotal.components.aLevelPeriodProjectedLkrMin, p.grandTotal.components.aLevelPeriodProjectedLkrMax),
+          ],
+          [
+            `උපාධි වියදම — වසර ${yearsToHigherEd}කින් පසු, ${yearsLabel(p.grandTotal.degreeDurationYearsMin, p.grandTotal.degreeDurationYearsMax)} සඳහා`,
+            range(p.grandTotal.components.degreeCostProjectedLkrMin, p.grandTotal.components.degreeCostProjectedLkrMax),
+          ],
+          [
+            `ජීවන වියදම් — වසර ${yearsToHigherEd}කින් පසු, ${yearsLabel(p.grandTotal.degreeDurationYearsMin, p.grandTotal.degreeDurationYearsMax)} සඳහා`,
+            range(p.grandTotal.components.livingCostProjectedLkrMin, p.grandTotal.components.livingCostProjectedLkrMax),
+          ],
+        ],
+        ["සම්පූර්ණ එකතුව", range(p.grandTotal.projectedTotalLkrMin, p.grandTotal.projectedTotalLkrMax)],
+      ),
+      true,
+    ),
+  );
+
   if (p.alTuition.applicable) {
     sections.push(
       section(
@@ -215,7 +246,7 @@ export function buildReportHtml(
 
   sections.push(
     section(
-      "අධ්‍යාපන වියදම්",
+      `අධ්‍යාපන වියදම් — ${p.education[0].categoryLabel}`,
       table(
         educationCols(yearsToHigherEd),
         p.education.map((e) => {
@@ -393,34 +424,6 @@ export function buildReportHtml(
     );
   }
 
-  sections.push(
-    section(
-      "සමස්ත සාරාංශය",
-      // Each row is inflation-adjusted to a DIFFERENT point in time (A/Level
-      // starts earlier than university), so the time period is stated per
-      // row rather than once in the header — a single header year would be
-      // wrong for at least one row.
-      table(
-        ["අංශය", "අනාගත ඇස්තමේන්තුව"],
-        [
-          [
-            `උසස් පෙළ — වසර ${p.alTuition.yearsUntilStart}කින් පසු, ${yearsLabel(p.grandTotal.aLevelPeriodYears, p.grandTotal.aLevelPeriodYears)} සඳහා`,
-            range(p.grandTotal.components.aLevelPeriodProjectedLkrMin, p.grandTotal.components.aLevelPeriodProjectedLkrMax),
-          ],
-          [
-            `උපාධි වියදම — වසර ${yearsToHigherEd}කින් පසු, ${yearsLabel(p.grandTotal.degreeDurationYearsMin, p.grandTotal.degreeDurationYearsMax)} සඳහා`,
-            range(p.grandTotal.components.degreeCostProjectedLkrMin, p.grandTotal.components.degreeCostProjectedLkrMax),
-          ],
-          [
-            `ජීවන වියදම් — වසර ${yearsToHigherEd}කින් පසු, ${yearsLabel(p.grandTotal.degreeDurationYearsMin, p.grandTotal.degreeDurationYearsMax)} සඳහා`,
-            range(p.grandTotal.components.livingCostProjectedLkrMin, p.grandTotal.components.livingCostProjectedLkrMax),
-          ],
-        ],
-        ["සම්පූර්ණ එකතුව", range(p.grandTotal.projectedTotalLkrMin, p.grandTotal.projectedTotalLkrMax)],
-      ),
-      true,
-    ),
-  );
 
   // ---- AIA plan benefit pages (static content, same as /child-report/plan-benefits
   // and /child-report/health-plan-benefits — appended here per operator request).

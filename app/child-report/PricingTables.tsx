@@ -71,6 +71,33 @@ export default function PricingTables({ projection }: { projection: ChildFutureP
 
   return (
     <div className="space-y-8">
+      {/* Headline summary goes FIRST — the reader should see the total they're
+          planning for before the per-category breakdowns that build up to it. */}
+      <TableSection title="සමස්ත සාරාංශය (Grand Total Summary)" highlight>
+        {/* Each row is inflation-adjusted to a DIFFERENT point in time (A/Level
+            starts earlier than university), so the time period is stated per
+            row here rather than once in the header — a single header year
+            would be wrong for at least one row. */}
+        <Table
+          headers={["අංශය (Component)", "අනාගත ඇස්තමේන්තුව (Projected)"]}
+          rows={[
+            [
+              `උසස් පෙළ (A/Level) — වසර ${p.alTuition.yearsUntilStart}කින් පසු, ${yearsLabel(p.grandTotal.aLevelPeriodYears, p.grandTotal.aLevelPeriodYears)} සඳහා`,
+              range(p.grandTotal.components.aLevelPeriodProjectedLkrMin, p.grandTotal.components.aLevelPeriodProjectedLkrMax),
+            ],
+            [
+              `උපාධි වියදම (Degree cost) — වසර ${yearsToHigherEd}කින් පසු, ${yearsLabel(p.grandTotal.degreeDurationYearsMin, p.grandTotal.degreeDurationYearsMax)} සඳහා`,
+              range(p.grandTotal.components.degreeCostProjectedLkrMin, p.grandTotal.components.degreeCostProjectedLkrMax),
+            ],
+            [
+              `ජීවන වියදම් (Living costs) — වසර ${yearsToHigherEd}කින් පසු, ${yearsLabel(p.grandTotal.degreeDurationYearsMin, p.grandTotal.degreeDurationYearsMax)} සඳහා`,
+              range(p.grandTotal.components.livingCostProjectedLkrMin, p.grandTotal.components.livingCostProjectedLkrMax),
+            ],
+          ]}
+          totalRow={["සම්පූර්ණ එකතුව (GRAND TOTAL)", range(p.grandTotal.projectedTotalLkrMin, p.grandTotal.projectedTotalLkrMax)]}
+        />
+      </TableSection>
+
       {p.alTuition.applicable && (
         <TableSection title="උසස් පෙළ (A/Level) කාලය තුළ වියදම් — මුළු කාලසීමාව වසර 2.5ක් පමණ">
           <Table
@@ -102,7 +129,7 @@ export default function PricingTables({ projection }: { projection: ChildFutureP
         </TableSection>
       )}
 
-      <TableSection title="අධ්‍යාපන වියදම් (Education Cost)">
+      <TableSection title={`අධ්‍යාපන වියදම් (Education Cost) — ${p.education[0].categoryLabel}`}>
         <Table
           headers={educationCols(yearsToHigherEd)}
           rows={p.education.map((e) => {
@@ -289,31 +316,6 @@ export default function PricingTables({ projection }: { projection: ChildFutureP
               range(p.monthlyBudgetImpact.universityPeriod.projectedTotalBurdenLkrMin, p.monthlyBudgetImpact.universityPeriod.projectedTotalBurdenLkrMax),
             ],
           ]}
-        />
-      </TableSection>
-
-      <TableSection title="සමස්ත සාරාංශය (Grand Total Summary)" highlight>
-        {/* Each row is inflation-adjusted to a DIFFERENT point in time (A/Level
-            starts earlier than university), so the time period is stated per
-            row here rather than once in the header — a single header year
-            would be wrong for at least one row. */}
-        <Table
-          headers={["අංශය (Component)", "අනාගත ඇස්තමේන්තුව (Projected)"]}
-          rows={[
-            [
-              `උසස් පෙළ (A/Level) — වසර ${p.alTuition.yearsUntilStart}කින් පසු, ${yearsLabel(p.grandTotal.aLevelPeriodYears, p.grandTotal.aLevelPeriodYears)} සඳහා`,
-              range(p.grandTotal.components.aLevelPeriodProjectedLkrMin, p.grandTotal.components.aLevelPeriodProjectedLkrMax),
-            ],
-            [
-              `උපාධි වියදම (Degree cost) — වසර ${yearsToHigherEd}කින් පසු, ${yearsLabel(p.grandTotal.degreeDurationYearsMin, p.grandTotal.degreeDurationYearsMax)} සඳහා`,
-              range(p.grandTotal.components.degreeCostProjectedLkrMin, p.grandTotal.components.degreeCostProjectedLkrMax),
-            ],
-            [
-              `ජීවන වියදම් (Living costs) — වසර ${yearsToHigherEd}කින් පසු, ${yearsLabel(p.grandTotal.degreeDurationYearsMin, p.grandTotal.degreeDurationYearsMax)} සඳහා`,
-              range(p.grandTotal.components.livingCostProjectedLkrMin, p.grandTotal.components.livingCostProjectedLkrMax),
-            ],
-          ]}
-          totalRow={["සම්පූර්ණ එකතුව (GRAND TOTAL)", range(p.grandTotal.projectedTotalLkrMin, p.grandTotal.projectedTotalLkrMax)]}
         />
       </TableSection>
 
