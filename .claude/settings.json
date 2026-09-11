@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -s http://localhost:3000/child-report --max-time 10)",
+      "Bash(curl -s -b operator_session=__TRACKED_VAR__ http://localhost:3000/admin -o /tmp/admin-page2.html --max-time 10)",
+      "Bash(grep -o \"Oshada Dilshan.\\\\{0,2000\\\\}\" /tmp/admin-page2.html)",
+      "Bash(grep -o \"bg-amber-100.\\\\{0,150\\\\}\" /tmp/admin-page2.html)",
+      "Bash(grep -o \"bg-amber-100.\\\\{0,300\\\\}\")"
+    ]
+  }
+}

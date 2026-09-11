@@ -68,7 +68,13 @@ function buildFactsBlock(profile: ChildProfileInput, projection: ChildFutureProj
   lines.push(`Typical higher education entry age in Sri Lanka: 19`);
   lines.push(`Years until then: ${projection.yearsToHigherEducation}`);
   lines.push(`Province: ${profile.province}`);
+  if (profile.customerOccupation) {
+    lines.push(`Customer/parent occupation: ${profile.customerOccupation}`);
+  }
   lines.push(`Household current monthly expense (excluding this child's education): LKR ${profile.householdMonthlyExpenseLkr.toLocaleString()}`);
+  if (profile.householdMonthlySavingsLkr != null) {
+    lines.push(`Household current monthly savings: LKR ${profile.householdMonthlySavingsLkr.toLocaleString()}`);
+  }
   const planLabel =
     HIGHER_EDUCATION_PLANS.find((p) => p.value === profile.higherEducationPlan)?.label ??
     profile.higherEducationPlan;

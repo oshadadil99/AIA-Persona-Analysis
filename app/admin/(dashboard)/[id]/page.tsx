@@ -57,6 +57,7 @@ export default async function AdminCustomerDetailPage({ params }: { params: Prom
           <InfoRow label="Name" value={row.customer_name} />
           <InfoRow label="Contact number" value={row.customer_contact_number} />
           <InfoRow label="Age" value={row.customer_age} />
+          <InfoRow label="Occupation" value={row.customer_occupation} />
           <InfoRow label="Dependents" value={row.dependents_count} />
           <InfoRow label="Desired life cover" value={row.desired_life_cover_lkr ? `LKR ${Number(row.desired_life_cover_lkr).toLocaleString()}` : null} />
           <InfoRow label="Monthly budget" value={row.monthly_budget_lkr ? `LKR ${Number(row.monthly_budget_lkr).toLocaleString()}` : null} />
@@ -68,6 +69,7 @@ export default async function AdminCustomerDetailPage({ params }: { params: Prom
           <InfoRow label="Age" value={row.child_age} />
           <InfoRow label="Province" value={row.province} />
           <InfoRow label="Household monthly expense" value={`LKR ${Number(row.household_monthly_expense_lkr).toLocaleString()}`} />
+          <InfoRow label="Household monthly savings" value={row.household_monthly_savings_lkr != null ? `LKR ${Number(row.household_monthly_savings_lkr).toLocaleString()}` : null} />
           <InfoRow label="Higher education plan" value={`${planLabel}${fieldLabel ? ` — ${fieldLabel}` : ""}`} />
           <InfoRow label="Critical illnesses" value={(row.critical_illnesses ?? []).join(", ") || null} />
           <InfoRow

@@ -23,6 +23,7 @@ const emptyForm: ChildProfileInput = {
   customerName: "",
   customerContactNumber: "",
   customerAge: null,
+  customerOccupation: "",
   dependentsCount: 0,
   desiredLifeCoverLkr: null,
   monthlyBudgetLkr: null,
@@ -31,6 +32,7 @@ const emptyForm: ChildProfileInput = {
   childAge: 0,
   province: "Western",
   householdMonthlyExpenseLkr: 0,
+  householdMonthlySavingsLkr: null,
   criticalIllnesses: [],
   higherEducationPlan: "undecided",
   localPrivateDegreeField: null,
@@ -38,6 +40,18 @@ const emptyForm: ChildProfileInput = {
   sportsMonthlyCostLkr: null,
   notes: "",
 };
+
+// wa.me needs an international-format number (country code, no leading 0,
+// no spaces/dashes). Contact numbers are typically entered in local Sri
+// Lankan format (leading 0), so normalize before building the link.
+function buildWhatsAppLink(contactNumber: string | null, childName: string | null): string | null {
+  if (!contactNumber) return null;
+  const digits = contactNumber.replace(/\D/g, "");
+  if (!digits) return null;
+  const international = digits.startsWith("94") ? digits : digits.startsWith("0") ? `94${digits.slice(1)}` : `94${digits}`;
+  const message = `Hello, here is ${childName ? `${childName}'s` : "your"} future outlook report from AIA — please find the PDF attached below.`;
+  return `https://wa.me/${international}?text=${encodeURIComponent(message)}`;
+}
 
 export default function ChildReportPage() {
   const [form, setForm] = useState<ChildProfileInput>(emptyForm);
@@ -198,59 +212,75 @@ export default function ChildReportPage() {
               </Field>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <Field label="Desired life cover (LKR, optional)">
-                <input
-                  type="number"
-                  min={0}
-                  value={form.desiredLifeCoverLkr ?? ""}
-                  onChange={(e) =>
-                    setForm((f) => ({
-                      ...f,
-                      desiredLifeCoverLkr: e.target.value.trim() === "" ? null : Number(e.target.value),
-                    }))
-                  }
-                  className="input"
-                />
-              </Field>
-
-              <Field label="Monthly budget for premium (LKR, optional)">
-                <input
-                  type="number"
-                  min={0}
-                  value={form.monthlyBudgetLkr ?? ""}
-                  onChange={(e) =>
-                    setForm((f) => ({
-                      ...f,
-                      monthlyBudgetLkr: e.target.value.trim() === "" ? null : Number(e.target.value),
-                    }))
-                  }
-                  className="input"
-                />
-              </Field>
-            </div>
-
-            <Field label="Customer health flags">
-              <div className="flex flex-wrap gap-3">
-                {CUSTOMER_HEALTH_FLAGS.map(({ value, label }) => (
-                  <label
-                    key={value}
-                    className="flex cursor-pointer items-center gap-2 rounded-full border border-neutral-300/80
-                      bg-white/60 px-3 py-1.5 text-sm transition has-checked:border-emerald-500
-                      has-checked:bg-emerald-50 dark:border-neutral-700 dark:bg-neutral-800/50
-                      dark:has-checked:border-emerald-500 dark:has-checked:bg-emerald-900/30"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={form.customerHealthFlags.includes(value)}
-                      onChange={() => toggleCustomerHealthFlag(value)}
-                      className="accent-emerald-600"
-                    />
-                    {label}
-                  </label>
-                ))}
-              </div>
+            <Field label="Occupation">
+              <input
+                type="text"
+                value={form.customerOccupation ?? ""}
+                onChange={(e) => setForm((f) => ({ ...f, customerOccupation: e.target.value }))}
+                className="input"
+              />
             </Field>
+
+            {/* Temporarily hidden from the form per operator request (2026-09-11) —
+                field, state, validation, and DB columns are all untouched, only the
+                inputs are not rendered. Re-enable by uncommenting this block. */}
+            {false && (
+              <>
+                <div className="grid grid-cols-2 gap-4">
+                  <Field label="Desired life cover (LKR, optional)">
+                    <input
+                      type="number"
+                      min={0}
+                      value={form.desiredLifeCoverLkr ?? ""}
+                      onChange={(e) =>
+                        setForm((f) => ({
+                          ...f,
+                          desiredLifeCoverLkr: e.target.value.trim() === "" ? null : Number(e.target.value),
+                        }))
+                      }
+                      className="input"
+                    />
+                  </Field>
+
+                  <Field label="Monthly budget for premium (LKR, optional)">
+                    <input
+                      type="number"
+                      min={0}
+                      value={form.monthlyBudgetLkr ?? ""}
+                      onChange={(e) =>
+                        setForm((f) => ({
+                          ...f,
+                          monthlyBudgetLkr: e.target.value.trim() === "" ? null : Number(e.target.value),
+                        }))
+                      }
+                      className="input"
+                    />
+                  </Field>
+                </div>
+
+                <Field label="Customer health flags">
+                  <div className="flex flex-wrap gap-3">
+                    {CUSTOMER_HEALTH_FLAGS.map(({ value, label }) => (
+                      <label
+                        key={value}
+                        className="flex cursor-pointer items-center gap-2 rounded-full border border-neutral-300/80
+                          bg-white/60 px-3 py-1.5 text-sm transition has-checked:border-emerald-500
+                          has-checked:bg-emerald-50 dark:border-neutral-700 dark:bg-neutral-800/50
+                          dark:has-checked:border-emerald-500 dark:has-checked:bg-emerald-900/30"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={form.customerHealthFlags.includes(value)}
+                          onChange={() => toggleCustomerHealthFlag(value)}
+                          className="accent-emerald-600"
+                        />
+                        {label}
+                      </label>
+                    ))}
+                  </div>
+                </Field>
+              </>
+            )}
 
             <SectionHeading>Child</SectionHeading>
 
@@ -290,16 +320,33 @@ export default function ChildReportPage() {
               </Field>
             </div>
 
-            <Field label="Household monthly expense (LKR) — current, excluding this child's education" required>
-              <input
-                type="number"
-                required
-                min={0}
-                value={form.householdMonthlyExpenseLkr || ""}
-                onChange={(e) => setForm((f) => ({ ...f, householdMonthlyExpenseLkr: Number(e.target.value) }))}
-                className="input"
-              />
-            </Field>
+            <div className="grid grid-cols-2 gap-4">
+              <Field label="Household monthly expense (LKR) — current, excluding this child's education" required>
+                <input
+                  type="number"
+                  required
+                  min={0}
+                  value={form.householdMonthlyExpenseLkr || ""}
+                  onChange={(e) => setForm((f) => ({ ...f, householdMonthlyExpenseLkr: Number(e.target.value) }))}
+                  className="input"
+                />
+              </Field>
+
+              <Field label="Household monthly savings (LKR, optional)">
+                <input
+                  type="number"
+                  min={0}
+                  value={form.householdMonthlySavingsLkr ?? ""}
+                  onChange={(e) =>
+                    setForm((f) => ({
+                      ...f,
+                      householdMonthlySavingsLkr: e.target.value.trim() === "" ? null : Number(e.target.value),
+                    }))
+                  }
+                  className="input"
+                />
+              </Field>
+            </div>
 
             <Field label="Higher education plan">
               <select
@@ -452,6 +499,25 @@ export default function ChildReportPage() {
                   {downloadingPdf ? "Generating PDF…" : "Download PDF"}
                 </button>
 
+                {(() => {
+                  const waLink = buildWhatsAppLink(submittedProfile?.customerContactNumber ?? null, submittedProfile?.childName ?? null);
+                  return waLink ? (
+                    <a
+                      href={waLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex w-full items-center justify-center rounded-lg bg-[#25D366] px-4 py-3 text-sm
+                        font-semibold text-white shadow-sm transition hover:bg-[#1ebe57] sm:w-auto"
+                    >
+                      Send via WhatsApp
+                    </a>
+                  ) : (
+                    <p className="flex w-full items-center text-sm text-neutral-500 dark:text-neutral-400 sm:w-auto">
+                      No contact number on file — can&apos;t open WhatsApp.
+                    </p>
+                  );
+                })()}
+
                 <Link
                   href="/child-report/plan-benefits"
                   className="flex w-full items-center justify-center rounded-lg border border-emerald-600 px-4 py-3
@@ -470,6 +536,10 @@ export default function ChildReportPage() {
                   View AIA Health Plan Benefits →
                 </Link>
               </div>
+
+              <p className="mt-2 text-xs text-neutral-500 dark:text-neutral-400">
+                WhatsApp only opens the chat with a pre-filled message — download the PDF first, then attach it manually in the chat.
+              </p>
 
               {pdfError && (
                 <p className="mt-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-300">
