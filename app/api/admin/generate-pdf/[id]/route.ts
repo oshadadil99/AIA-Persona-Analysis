@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { cookies } from "next/headers";
-import { SESSION_COOKIE_NAME, verifySessionToken } from "@/lib/auth/session";
+import { getCurrentUser } from "@/lib/auth/dal";
 import { createServiceClient } from "@/lib/db/supabase";
 import { buildReportHtml } from "@/lib/pdf/report-html-template";
 import { renderHtmlToPdf } from "@/lib/pdf/render-pdf";
@@ -18,9 +17,10 @@ function sanitizeFilenamePart(s: string): string {
 }
 
 export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const cookieStore = await cookies();
-  const token = cookieStore.get(SESSION_COOKIE_NAME)?.value;
-  if (!verifySessionToken(token)) {
+  // /api is excluded from the proxy matcher, so this is the only gate on this
+  // route — it hands back any customer's stored report by id.
+  const user = await getCurrentUser();
+  if (!user || user.role !== "admin") {
     return NextResponse.json({ error: "Not authenticated." }, { status: 401 });
   }
 

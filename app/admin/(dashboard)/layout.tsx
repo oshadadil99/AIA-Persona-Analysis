@@ -1,16 +1,9 @@
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
 import Link from "next/link";
-import { SESSION_COOKIE_NAME, verifySessionToken } from "@/lib/auth/session";
-import { logoutOperator } from "../login/actions";
+import { requireAdmin } from "@/lib/auth/dal";
+import { logout } from "@/app/login/actions";
 
 export default async function AdminDashboardLayout({ children }: { children: React.ReactNode }) {
-  const cookieStore = await cookies();
-  const token = cookieStore.get(SESSION_COOKIE_NAME)?.value;
-
-  if (!verifySessionToken(token)) {
-    redirect("/admin/login");
-  }
+  const user = await requireAdmin();
 
   return (
     <div className="min-h-screen bg-neutral-50 dark:bg-neutral-950">
@@ -19,14 +12,29 @@ export default async function AdminDashboardLayout({ children }: { children: Rea
           <Link href="/admin" className="text-sm font-semibold text-neutral-900 dark:text-white">
             Customer Records
           </Link>
-          <form action={logoutOperator}>
-            <button
-              type="submit"
+          <div className="flex items-center gap-4">
+            <Link
+              href="/admin/users"
               className="text-sm text-neutral-500 transition hover:text-neutral-900 dark:hover:text-white"
             >
-              Log out
-            </button>
-          </form>
+              Users
+            </Link>
+            <Link
+              href="/child-report"
+              className="text-sm text-neutral-500 transition hover:text-neutral-900 dark:hover:text-white"
+            >
+              New report
+            </Link>
+            <span className="text-sm text-neutral-400">{user.username}</span>
+            <form action={logout}>
+              <button
+                type="submit"
+                className="text-sm text-neutral-500 transition hover:text-neutral-900 dark:hover:text-white"
+              >
+                Log out
+              </button>
+            </form>
+          </div>
         </div>
       </header>
 
