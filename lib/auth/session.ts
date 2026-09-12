@@ -1,47 +1,77 @@
 import { createHmac, timingSafeEqual } from "crypto";
 
-export const SESSION_COOKIE_NAME = "operator_session";
-const SESSION_MESSAGE = "operator-authenticated";
+export const SESSION_COOKIE_NAME = "session";
 const SESSION_MAX_AGE_SECONDS = 60 * 60 * 24 * 7; // 7 days
 
-// Session token is an HMAC of a fixed message, keyed by the operator
-// password. This ties session validity to the password without needing a
-// separate secret or a sessions table — rotating the password automatically
-// invalidates all existing sessions.
-function getSecret(): string {
-  const secret = process.env.OPERATOR_PASSWORD;
+export type UserRole = "agent" | "admin";
+
+export interface SessionPayload {
+  uid: string;
+  username: string;
+  role: UserRole;
+  exp: number; // unix seconds
+}
+
+// The cookie is "<base64url payload>.<hmac>" — readable but not forgeable
+// without SESSION_SECRET. Keyed by its own secret rather than by a password,
+// so changing someone's password doesn't sign everyone else out.
+function getSecret(): string | null {
+  return process.env.SESSION_SECRET || null;
+}
+
+function sign(body: string, secret: string): string {
+  return createHmac("sha256", secret).update(body).digest("base64url");
+}
+
+export function createSessionToken(user: { id: string; username: string; role: UserRole }): string {
+  const secret = getSecret();
   if (!secret) {
-    throw new Error("OPERATOR_PASSWORD is not set — cannot manage operator sessions.");
+    throw new Error("SESSION_SECRET is not set — cannot create a login session.");
   }
-  return secret;
+
+  const payload: SessionPayload = {
+    uid: user.id,
+    username: user.username,
+    role: user.role,
+    exp: Math.floor(Date.now() / 1000) + SESSION_MAX_AGE_SECONDS,
+  };
+  const body = Buffer.from(JSON.stringify(payload)).toString("base64url");
+  return `${body}.${sign(body, secret)}`;
 }
 
-export function createSessionToken(): string {
-  return createHmac("sha256", getSecret()).update(SESSION_MESSAGE).digest("hex");
-}
+// Returns the payload only if the signature checks out AND it hasn't expired;
+// null otherwise. Fails closed on a missing secret rather than throwing, since
+// this runs on every request including the proxy.
+export function verifySessionToken(token: string | undefined | null): SessionPayload | null {
+  if (!token) return null;
 
-export function verifySessionToken(token: string | undefined | null): boolean {
-  if (!token) return false;
-  let secret: string;
+  const secret = getSecret();
+  if (!secret) return null;
+
+  const separator = token.lastIndexOf(".");
+  if (separator <= 0) return null;
+
+  const body = token.slice(0, separator);
+  const signature = token.slice(separator + 1);
+
+  const expected = Buffer.from(sign(body, secret));
+  const provided = Buffer.from(signature);
+  if (expected.length !== provided.length || !timingSafeEqual(expected, provided)) {
+    return null;
+  }
+
+  let payload: SessionPayload;
   try {
-    secret = getSecret();
+    payload = JSON.parse(Buffer.from(body, "base64url").toString("utf8"));
   } catch {
-    return false;
+    return null;
   }
-  const expected = createHmac("sha256", secret).update(SESSION_MESSAGE).digest("hex");
-  const expectedBuf = Buffer.from(expected, "hex");
-  const tokenBuf = Buffer.from(token, "hex");
-  if (expectedBuf.length !== tokenBuf.length) return false;
-  return timingSafeEqual(expectedBuf, tokenBuf);
-}
 
-export function verifyPassword(password: string): boolean {
-  const secret = process.env.OPERATOR_PASSWORD;
-  if (!secret) return false;
-  const a = Buffer.from(password);
-  const b = Buffer.from(secret);
-  if (a.length !== b.length) return false;
-  return timingSafeEqual(a, b);
+  if (typeof payload?.uid !== "string" || typeof payload?.exp !== "number") return null;
+  if (payload.role !== "agent" && payload.role !== "admin") return null;
+  if (payload.exp * 1000 < Date.now()) return null;
+
+  return payload;
 }
 
 export const SESSION_COOKIE_OPTIONS = {

@@ -1,6 +1,7 @@
 "use server";
 
 import { createServiceClient } from "@/lib/db/supabase";
+import { getCurrentUser } from "@/lib/auth/dal";
 import { projectChildFuture } from "@/lib/pipeline/child-future-projection";
 import { generateChildReportSinhala } from "@/lib/pipeline/generate-child-report-sinhala";
 import type { ChildProfileInput } from "@/types/child-profile";
@@ -19,6 +20,14 @@ export interface SubmitChildProfileResult {
 export async function submitChildProfileAndGenerateReport(
   input: ChildProfileInput,
 ): Promise<SubmitChildProfileResult> {
+  // Server actions are reachable by anyone who knows the endpoint — the
+  // layout's requireUser() doesn't cover this call. Without it, an unsigned-in
+  // caller could burn Gemini quota and write rows.
+  const user = await getCurrentUser();
+  if (!user) {
+    return { ok: false, error: "Your session has expired. Please sign in again." };
+  }
+
   if (!Number.isFinite(input.childAge) || input.childAge < 0) {
     return { ok: false, error: "Child's age must be a non-negative number." };
   }

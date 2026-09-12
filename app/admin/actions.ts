@@ -1,14 +1,15 @@
 "use server";
 
-import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { createServiceClient } from "@/lib/db/supabase";
-import { SESSION_COOKIE_NAME, verifySessionToken } from "@/lib/auth/session";
+import { getCurrentUser } from "@/lib/auth/dal";
 
+// Server actions are publicly callable endpoints — the proxy redirect and the
+// layout's requireAdmin() don't protect them, so each action re-checks. Throws
+// rather than redirects so the caller can show the error inline.
 async function requireOperatorSession(): Promise<void> {
-  const cookieStore = await cookies();
-  const token = cookieStore.get(SESSION_COOKIE_NAME)?.value;
-  if (!verifySessionToken(token)) {
+  const user = await getCurrentUser();
+  if (!user || user.role !== "admin") {
     throw new Error("Not authenticated.");
   }
 }

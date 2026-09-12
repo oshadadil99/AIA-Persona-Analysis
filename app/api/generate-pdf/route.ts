@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getCurrentUser } from "@/lib/auth/dal";
 import { buildReportHtml } from "@/lib/pdf/report-html-template";
 import { renderHtmlToPdf } from "@/lib/pdf/render-pdf";
 import type { ChildProfileInput } from "@/types/child-profile";
@@ -15,6 +16,13 @@ function sanitizeFilenamePart(s: string): string {
 }
 
 export async function POST(request: NextRequest) {
+  // /api is excluded from the proxy matcher, so this route gates itself —
+  // otherwise it's a free public PDF renderer running headless Chromium.
+  const user = await getCurrentUser();
+  if (!user) {
+    return NextResponse.json({ error: "Not authenticated." }, { status: 401 });
+  }
+
   try {
     const body = (await request.json()) as {
       profile: ChildProfileInput;
